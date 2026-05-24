@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#6366F1">
+  <meta name="theme-color" content="#6366F1" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#1E293B" media="(prefers-color-scheme: dark)">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Todos">
@@ -32,9 +33,26 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0F172A;
+        --surface: #1E293B;
+        --surface2: #263348;
+        --text: #F1F5F9;
+        --text2: #94A3B8;
+        --text3: #475569;
+        --border: #334155;
+        --shadow: 0 1px 3px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.25);
+        --shadow-lg: 0 10px 25px rgba(0,0,0,.5), 0 4px 10px rgba(0,0,0,.35);
+        --c-haushalt-bg: #1e3a5f;
+        --c-garten-bg:   #14352a;
+        --c-druck-bg:    #3d2110;
+        --c-kids-bg:     #3d1530;
+      }
+    }
+
     html, body {
-      height: 100%;
-      height: 100dvh;
+      height: 100%; height: 100dvh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
@@ -43,8 +61,7 @@
     }
 
     #app {
-      height: 100%;
-      height: 100dvh;
+      height: 100%; height: 100dvh;
       max-width: 540px;
       margin: 0 auto;
       display: flex;
@@ -54,79 +71,41 @@
     /* ── Header ── */
     header {
       flex-shrink: 0;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      position: sticky; top: 0; z-index: 10;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       padding-top: var(--safe-top);
     }
-
     .header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
       padding: 14px 20px 10px;
     }
-
-    h1 {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: -.4px;
-      line-height: 1.1;
-    }
-
-    .count-badge {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text3);
-      display: block;
-      margin-top: 1px;
-    }
+    h1 { font-size: 22px; font-weight: 700; letter-spacing: -.4px; line-height: 1.1; }
+    .count-badge { font-size: 13px; font-weight: 500; color: var(--text3); display: block; margin-top: 1px; }
 
     .btn-add-header {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      background: var(--primary);
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--primary); color: #fff; border: none;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 8px rgba(99,102,241,.4);
-      transition: transform .15s, box-shadow .15s;
-      flex-shrink: 0;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
+      transition: transform .15s, box-shadow .15s; flex-shrink: 0;
+      touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none;
     }
     .btn-add-header:active { transform: scale(.91); box-shadow: 0 1px 4px rgba(99,102,241,.3); }
 
     /* ── Filter tabs ── */
     .filter-scroll {
-      overflow-x: auto;
-      padding: 0 20px 12px;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
+      overflow-x: auto; padding: 0 20px 12px;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
     }
     .filter-scroll::-webkit-scrollbar { display: none; }
-
     .filter-tabs { display: flex; gap: 8px; width: max-content; }
-
     .filter-tab {
-      padding: 7px 16px;
-      border-radius: 20px;
-      border: 1.5px solid var(--border);
-      background: var(--surface2);
-      color: var(--text2);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all .15s;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      user-select: none;
-      min-height: 36px;
+      padding: 7px 16px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text2); font-size: 14px; font-weight: 500;
+      cursor: pointer; white-space: nowrap; transition: all .15s; min-height: 36px;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none;
     }
     .filter-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
     .filter-tab[data-cat="haushalt"].active { background: var(--c-haushalt); border-color: var(--c-haushalt); }
@@ -136,63 +115,59 @@
 
     /* ── Main ── */
     main {
-      flex: 1;
-      padding: 12px 16px;
-      padding-bottom: calc(var(--safe-bottom) + 24px);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 12px 16px calc(var(--safe-bottom) + 24px);
     }
-
     .section-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .6px;
-      text-transform: uppercase;
-      color: var(--text3);
-      padding: 4px 4px 8px;
+      font-size: 11px; font-weight: 600; letter-spacing: .6px;
+      text-transform: uppercase; color: var(--text3); padding: 4px 4px 8px;
     }
-
     .todo-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+    /* ── Swipe wrapper ── */
+    .todo-wrap { position: relative; border-radius: var(--radius); }
+
+    .swipe-bg {
+      position: absolute; inset: 0; border-radius: var(--radius);
+      display: flex; align-items: center; opacity: 0;
+    }
+    .swipe-bg-right { background: #DCFCE7; padding-left: 20px; }
+    .swipe-bg-left  { background: #FEE2E2; justify-content: flex-end; padding-right: 20px; }
+
+    @media (prefers-color-scheme: dark) {
+      .swipe-bg-right { background: #14352a; }
+      .swipe-bg-left  { background: #3d1515; }
+    }
 
     /* ── Todo card ── */
     .todo-card {
-      background: var(--surface);
-      border-radius: var(--radius);
+      position: relative; z-index: 1;
+      background: var(--surface); border-radius: var(--radius);
       box-shadow: var(--shadow);
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      display: flex; align-items: center; gap: 4px;
       padding: 12px 12px 12px 4px;
-      transition: opacity .2s;
       -webkit-tap-highlight-color: transparent;
     }
     .todo-card.done { opacity: .45; }
     .todo-card.overdue { border-left: 3px solid #EF4444; }
+    .todo-card.important:not(.overdue) { border-left: 3px solid #F59E0B; }
 
-    /* 44×44 tap target wrapping the visual circle */
+    /* 44×44 tap target for check */
     .check-btn {
-      width: 44px; height: 44px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      flex-shrink: 0;
+      width: 44px; height: 44px; border: none; background: none;
+      cursor: pointer; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      user-select: none;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none;
     }
     .check-ring {
-      width: 26px; height: 26px;
-      border-radius: 50%;
+      width: 26px; height: 26px; border-radius: 50%;
       border: 2px solid var(--border);
       display: flex; align-items: center; justify-content: center;
-      transition: all .15s;
-      flex-shrink: 0;
+      transition: all .15s; flex-shrink: 0;
     }
     .check-ring svg { display: none; }
     .todo-card.done .check-ring svg { display: block; }
     .todo-card.done .check-ring { border-color: transparent; }
-
     .check-ring[data-cat="haushalt"] { border-color: var(--c-haushalt); }
     .check-ring[data-cat="garten"]   { border-color: var(--c-garten); }
     .check-ring[data-cat="druck"]    { border-color: var(--c-druck); }
@@ -204,20 +179,32 @@
 
     .todo-body { flex: 1; min-width: 0; }
 
+    .title-row { display: flex; align-items: flex-start; gap: 6px; }
     .todo-title {
-      font-size: 15px;
-      font-weight: 500;
-      line-height: 1.35;
-      word-break: break-word;
+      flex: 1; font-size: 15px; font-weight: 500;
+      line-height: 1.35; word-break: break-word;
     }
     .todo-card.done .todo-title { text-decoration: line-through; color: var(--text2); }
 
+    /* Star button inside title row */
+    .star-btn {
+      font-size: 17px; line-height: 1;
+      background: none; border: none; cursor: pointer;
+      color: var(--text3); padding: 1px 2px; flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+      transition: color .15s, transform .15s;
+    }
+    .star-btn.active { color: #F59E0B; }
+    .star-btn:active { transform: scale(1.25); }
+
+    .todo-note {
+      font-size: 13px; color: var(--text2); margin-top: 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.3;
+    }
     .todo-meta {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 5px;
-      flex-wrap: wrap;
+      display: flex; align-items: center; gap: 6px;
+      margin-top: 5px; flex-wrap: wrap;
     }
 
     .cat-badge {
@@ -236,19 +223,14 @@
     .due-overdue  { background: #FEE2E2; color: #DC2626; }
     .due-today    { background: #FEF3C7; color: #B45309; }
     .due-soon     { background: #DCFCE7; color: #15803D; }
-    .due-upcoming { background: #F1F5F9; color: #64748B; }
+    .due-upcoming { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
 
     .delete-btn {
-      width: 44px; height: 44px;
-      border: none; background: none;
-      color: var(--text3);
-      cursor: pointer;
+      width: 44px; height: 44px; border: none; background: none;
+      color: var(--text3); cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: color .15s;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      user-select: none;
+      flex-shrink: 0; transition: color .15s;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
     }
     .delete-btn:active { color: #EF4444; }
 
@@ -259,166 +241,108 @@
 
     /* ── Backdrop ── */
     .backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
+      display: none; position: fixed; inset: 0;
       background: rgba(15,23,42,.5);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       z-index: 20;
     }
     .backdrop.open { display: flex; align-items: flex-end; justify-content: center; }
     @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
 
-    /* ── Modal sheet ── */
+    /* ── Modal ── */
     .modal {
-      background: var(--surface);
-      border-radius: 20px 20px 0 0;
-      width: 100%;
-      max-width: 540px;
-      max-height: 92dvh;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      background: var(--surface); border-radius: 20px 20px 0 0;
+      width: 100%; max-width: 540px;
+      max-height: 92dvh; overflow-y: auto; -webkit-overflow-scrolling: touch;
       padding: 0 20px calc(var(--safe-bottom) + 20px);
       box-shadow: var(--shadow-lg);
       animation: slideUp .28s cubic-bezier(.32,1,.44,1);
     }
-
     .modal-handle {
-      width: 40px; height: 4px;
-      background: var(--border);
-      border-radius: 4px;
-      margin: 12px auto 20px;
+      width: 40px; height: 4px; background: var(--border);
+      border-radius: 4px; margin: 12px auto 20px;
     }
-
     .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
 
     .field-label {
-      font-size: 12px; font-weight: 600;
-      letter-spacing: .4px; text-transform: uppercase;
-      color: var(--text2); margin-bottom: 8px;
+      font-size: 12px; font-weight: 600; letter-spacing: .4px;
+      text-transform: uppercase; color: var(--text2); margin-bottom: 8px;
       display: flex; align-items: baseline; gap: 6px;
     }
     .field-label .opt { font-size: 11px; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text3); }
 
-    .title-input {
-      width: 100%;
-      padding: 13px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: 16px;
-      font-family: inherit;
-      color: var(--text);
-      background: var(--surface2);
-      outline: none;
-      transition: border-color .15s;
-      margin-bottom: 20px;
+    .title-input, .note-input-field {
+      width: 100%; padding: 13px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 16px; font-family: inherit;
+      color: var(--text); background: var(--surface2);
+      outline: none; transition: border-color .15s;
     }
-    .title-input:focus { border-color: var(--primary); background: #fff; }
+    .title-input { margin-bottom: 20px; }
+    .note-input-field { font-size: 15px; margin-bottom: 20px; }
+    .title-input:focus, .note-input-field:focus { border-color: var(--primary); background: var(--surface); }
 
     /* ── Category picker ── */
-    .cat-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
+    .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
     .cat-option {
       display: flex; align-items: center; gap: 10px;
-      padding: 13px 14px;
-      border-radius: 12px;
-      border: 2px solid var(--border);
-      background: var(--surface2);
-      cursor: pointer;
-      transition: all .15s;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      user-select: none;
-      min-height: 48px;
+      padding: 13px 14px; border-radius: 12px;
+      border: 2px solid var(--border); background: var(--surface2);
+      cursor: pointer; transition: all .15s; min-height: 48px;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none;
     }
     .cat-option input { display: none; }
     .cat-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .cat-option span { font-size: 14px; font-weight: 500; }
-
     .cat-option[data-cat="haushalt"] .cat-dot { background: var(--c-haushalt); }
     .cat-option[data-cat="garten"]   .cat-dot { background: var(--c-garten); }
     .cat-option[data-cat="druck"]    .cat-dot { background: var(--c-druck); }
     .cat-option[data-cat="kids"]     .cat-dot { background: var(--c-kids); }
-
     .cat-option[data-cat="haushalt"].selected { border-color: var(--c-haushalt); background: var(--c-haushalt-bg); }
     .cat-option[data-cat="garten"].selected   { border-color: var(--c-garten);   background: var(--c-garten-bg); }
     .cat-option[data-cat="druck"].selected    { border-color: var(--c-druck);     background: var(--c-druck-bg); }
     .cat-option[data-cat="kids"].selected     { border-color: var(--c-kids);      background: var(--c-kids-bg); }
 
-    /* ── Due date picker ── */
-    .due-chips {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-
+    /* ── Due date ── */
+    .due-chips { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
     .due-chip {
       display: flex; align-items: center; gap: 5px;
-      padding: 9px 16px;
-      border-radius: 20px;
-      border: 1.5px solid var(--border);
-      background: var(--surface2);
-      color: var(--text2);
-      font-size: 14px; font-weight: 500;
-      cursor: pointer;
-      transition: all .15s;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      user-select: none;
-      font-family: inherit;
-      min-height: 40px;
+      padding: 9px 16px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text2); font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: all .15s; font-family: inherit; min-height: 40px;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none;
     }
-    .due-chip.active {
-      background: #EEF2FF; border-color: var(--primary); color: var(--primary);
+    .due-chip.active { background: #EEF2FF; border-color: var(--primary); color: var(--primary); }
+    @media (prefers-color-scheme: dark) {
+      .due-chip.active { background: #1e2060; }
     }
-
     .due-date-input {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: 16px; font-family: inherit;
-      color: var(--text);
-      background: var(--surface2);
-      outline: none;
-      margin-bottom: 4px;
-      transition: border-color .15s, max-height .2s;
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 16px; font-family: inherit; color: var(--text);
+      background: var(--surface2); outline: none;
+      transition: border-color .15s;
     }
-    .due-date-input:focus { border-color: var(--primary); background: #fff; }
+    .due-date-input:focus { border-color: var(--primary); background: var(--surface); }
     .due-date-input.hidden { display: none; }
-
     .due-section { margin-bottom: 20px; }
 
     /* ── Modal actions ── */
-    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-
+    .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
     .btn-cancel {
-      flex: 1; padding: 14px;
-      border-radius: 12px;
-      border: 1.5px solid var(--border);
-      background: none; color: var(--text2);
-      font-size: 15px; font-weight: 600;
-      cursor: pointer; font-family: inherit;
-      touch-action: manipulation; user-select: none;
-      min-height: 50px;
+      flex: 1; padding: 14px; border-radius: 12px;
+      border: 1.5px solid var(--border); background: none; color: var(--text2);
+      font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+      touch-action: manipulation; min-height: 50px;
     }
     .btn-save {
-      flex: 2; padding: 14px;
-      border-radius: 12px; border: none;
+      flex: 2; padding: 14px; border-radius: 12px; border: none;
       background: var(--primary); color: #fff;
-      font-size: 15px; font-weight: 600;
-      cursor: pointer; font-family: inherit;
+      font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
       box-shadow: 0 2px 8px rgba(99,102,241,.35);
       transition: opacity .15s, transform .1s;
-      touch-action: manipulation; user-select: none;
-      min-height: 50px;
+      touch-action: manipulation; min-height: 50px;
     }
     .btn-save:active { opacity: .85; transform: scale(.98); }
     .btn-save:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
@@ -448,19 +372,22 @@
       </div>
     </div>
   </header>
-
   <main id="main"></main>
 </div>
 
 <!-- Modal -->
 <div class="backdrop" id="backdrop">
-  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-handle"></div>
     <h2 id="modal-title">Neue Aufgabe</h2>
 
     <div class="field-label">Titel</div>
     <input type="text" class="title-input" id="todo-input"
            placeholder="Was muss erledigt werden?" maxlength="80" autocomplete="off">
+
+    <div class="field-label">Notiz <span class="opt">(optional)</span></div>
+    <input type="text" class="note-input-field" id="note-input"
+           placeholder="Zusätzliche Info..." maxlength="120" autocomplete="off">
 
     <div class="field-label">Kategorie</div>
     <div class="cat-grid" id="cat-grid">
@@ -517,7 +444,6 @@ function load() {
 }
 function save() { localStorage.setItem('todos', JSON.stringify(todos)); }
 
-// Returns YYYY-MM-DD for today + offsetDays, in local time
 function isoDate(offsetDays = 0) {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
@@ -526,8 +452,16 @@ function isoDate(offsetDays = 0) {
     String(d.getDate()).padStart(2, '0');
 }
 
-function addTodo(title, cat, due) {
-  todos.unshift({ id: Date.now().toString(36), title: title.trim(), cat, due: due || null, done: false });
+function addTodo(title, cat, due, note) {
+  todos.unshift({
+    id: Date.now().toString(36),
+    title: title.trim(),
+    cat,
+    due:       due  || null,
+    note:      note || null,
+    important: false,
+    done:      false,
+  });
   save(); render();
 }
 
@@ -536,26 +470,35 @@ function toggle(id) {
   if (t) { t.done = !t.done; save(); render(); }
 }
 
+function toggleImportant(id) {
+  const t = todos.find(t => t.id === id);
+  if (t) { t.important = !t.important; save(); render(); }
+}
+
 function remove(id) {
   todos = todos.filter(t => t.id !== id);
   save(); render();
 }
 
-// ── Due date helpers ──────────────────────────────────
+// ── Due date ─────────────────────────────────────────
 function dueLabelInfo(due) {
   if (!due) return null;
   const today = isoDate(0);
-  if (due < today)           return { text: 'Überfällig', cls: 'overdue' };
-  if (due === today)         return { text: 'Heute',      cls: 'today' };
-  if (due === isoDate(1))    return { text: 'Morgen',     cls: 'soon' };
-  if (due === isoDate(2))    return { text: 'Übermorgen', cls: 'soon' };
+  if (due < today)        return { text: 'Überfällig',  cls: 'overdue' };
+  if (due === today)      return { text: 'Heute',       cls: 'today' };
+  if (due === isoDate(1)) return { text: 'Morgen',      cls: 'soon' };
+  if (due === isoDate(2)) return { text: 'Übermorgen',  cls: 'soon' };
   const d = new Date(due + 'T12:00:00');
   return { text: d.toLocaleDateString('de-DE', { weekday:'short', day:'numeric', month:'short' }), cls: 'upcoming' };
 }
 
-function sortByDue(arr) {
+function sortOpen(arr) {
   const today = isoDate(0);
   return [...arr].sort((a, b) => {
+    // Important first
+    if (a.important && !b.important) return -1;
+    if (!a.important && b.important) return 1;
+    // Then by due date
     const ad = a.due, bd = b.due;
     if (!ad && !bd) return 0;
     if (!ad) return 1;
@@ -570,12 +513,15 @@ function sortByDue(arr) {
 function render() {
   const main = document.getElementById('main');
   const filtered = filter === 'all' ? todos : todos.filter(t => t.cat === filter);
-  const open = sortByDue(filtered.filter(t => !t.done));
+  const open = sortOpen(filtered.filter(t => !t.done));
   const done = filtered.filter(t => t.done);
 
   const totalOpen = todos.filter(t => !t.done).length;
+  const imp = todos.filter(t => !t.done && t.important).length;
   document.getElementById('count-label').textContent =
-    totalOpen > 0 ? `${totalOpen} offen` : 'Alles erledigt ✓';
+    totalOpen > 0
+      ? `${totalOpen} offen${imp > 0 ? ' · ' + imp + ' ★ wichtig' : ''}`
+      : 'Alles erledigt ✓';
 
   if (filtered.length === 0) {
     main.innerHTML = `<div class="empty-state">
@@ -588,24 +534,55 @@ function render() {
   let html = '';
   if (open.length > 0)
     html += `<div class="section-label">Offen (${open.length})</div>
-             <div class="todo-list">${open.map(cardHTML).join('')}</div>`;
+             <div class="todo-list">${open.map(wrapHTML).join('')}</div>`;
   if (done.length > 0)
     html += `<div class="section-label">Erledigt (${done.length})</div>
-             <div class="todo-list">${done.map(cardHTML).join('')}</div>`;
+             <div class="todo-list">${done.map(wrapHTML).join('')}</div>`;
 
   main.innerHTML = html;
+
+  // Button events
   main.querySelectorAll('.check-btn').forEach(btn =>
     btn.addEventListener('click', () => toggle(btn.dataset.id)));
+  main.querySelectorAll('.star-btn').forEach(btn =>
+    btn.addEventListener('click', () => toggleImportant(btn.dataset.id)));
   main.querySelectorAll('.delete-btn').forEach(btn =>
     btn.addEventListener('click', () => remove(btn.dataset.id)));
+
+  // Swipe events
+  main.querySelectorAll('.todo-wrap').forEach(wrap => {
+    const card   = wrap.querySelector('.todo-card');
+    const bgR    = wrap.querySelector('.swipe-bg-right');
+    const bgL    = wrap.querySelector('.swipe-bg-left');
+    const id     = card.dataset.id;
+    const isDone = card.classList.contains('done');
+    addSwipeHandlers(card, bgR, bgL, id, isDone);
+  });
+}
+
+function wrapHTML(t) {
+  return `<div class="todo-wrap">${cardHTML(t)}</div>`;
 }
 
 function cardHTML(t) {
   const label = CATS[t.cat] || t.cat;
-  const due = dueLabelInfo(t.due);
-  const overdueCls = !t.done && due?.cls === 'overdue' ? ' overdue' : '';
+  const due   = dueLabelInfo(t.due);
+  const isOverdue = !t.done && due?.cls === 'overdue';
+  const cls = [
+    t.done      ? 'done'      : '',
+    isOverdue   ? 'overdue'   : '',
+    t.important ? 'important' : '',
+  ].filter(Boolean).join(' ');
+
+  const noteLine = t.note
+    ? `<div class="todo-note">${escHtml(t.note)}</div>`
+    : '';
+  const dueLine = due
+    ? `<span class="due-label due-${due.cls}">${due.text}</span>`
+    : '';
+
   return `
-    <div class="todo-card${t.done ? ' done' : ''}${overdueCls}">
+    <div class="todo-card ${cls}" data-id="${t.id}">
       <button class="check-btn" data-id="${t.id}" aria-label="Erledigt umschalten">
         <span class="check-ring" data-cat="${t.cat}">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
@@ -614,10 +591,16 @@ function cardHTML(t) {
         </span>
       </button>
       <div class="todo-body">
-        <div class="todo-title">${escHtml(t.title)}</div>
+        <div class="title-row">
+          <div class="todo-title">${escHtml(t.title)}</div>
+          <button class="star-btn${t.important ? ' active' : ''}" data-id="${t.id}" aria-label="Wichtig">
+            ${t.important ? '★' : '☆'}
+          </button>
+        </div>
+        ${noteLine}
         <div class="todo-meta">
           <span class="cat-badge" data-cat="${t.cat}">${label}</span>
-          ${due ? `<span class="due-label due-${due.cls}">${due.text}</span>` : ''}
+          ${dueLine}
         </div>
       </div>
       <button class="delete-btn" data-id="${t.id}" aria-label="Löschen">
@@ -625,11 +608,75 @@ function cardHTML(t) {
           <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
       </button>
+    </div>
+    <div class="swipe-bg swipe-bg-right">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M4 12l6 6L20 6" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="swipe-bg swipe-bg-left">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M5 5l12 12M17 5L5 17" stroke="#EF4444" stroke-width="2" stroke-linecap="round"/>
+      </svg>
     </div>`;
 }
 
 function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Swipe ─────────────────────────────────────────────
+function addSwipeHandlers(card, bgR, bgL, id, isDone) {
+  let startX, startY, dx = 0, active = false;
+
+  card.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    dx = 0; active = false;
+    card.style.transition = 'none';
+  }, { passive: true });
+
+  card.addEventListener('touchmove', e => {
+    const curX = e.touches[0].clientX;
+    const curY = e.touches[0].clientY;
+    const ddx = curX - startX;
+    const ddy = curY - startY;
+
+    if (!active) {
+      if (Math.abs(ddx) < 8 && Math.abs(ddy) < 8) return;
+      if (Math.abs(ddy) >= Math.abs(ddx)) return; // vertical scroll
+      active = true;
+    }
+
+    e.preventDefault();
+    dx = isDone ? Math.min(0, ddx) : ddx; // done cards: left only
+
+    card.style.transform = `translateX(${dx}px)`;
+    const prog = Math.min(1, Math.abs(dx) / 75);
+    bgR.style.opacity = dx > 0 ? prog : 0;
+    bgL.style.opacity = dx < 0 ? prog : 0;
+  }, { passive: false });
+
+  card.addEventListener('touchend', () => {
+    if (!active) return;
+    const THRESH = 85;
+    card.style.transition = 'transform .22s cubic-bezier(.4,0,.2,1), opacity .22s';
+
+    if (!isDone && dx >= THRESH) {
+      card.style.transform = 'translateX(110vw)';
+      card.style.opacity = '0';
+      setTimeout(() => toggle(id), 220);
+    } else if (dx <= -THRESH) {
+      card.style.transform = 'translateX(-110vw)';
+      card.style.opacity = '0';
+      setTimeout(() => remove(id), 220);
+    } else {
+      card.style.transform = '';
+      bgR.style.opacity = 0;
+      bgL.style.opacity = 0;
+    }
+    dx = 0; active = false;
+  }, { passive: true });
 }
 
 // ── Filter tabs ───────────────────────────────────────
@@ -645,6 +692,7 @@ document.getElementById('filter-tabs').addEventListener('click', e => {
 // ── Modal ─────────────────────────────────────────────
 const backdrop     = document.getElementById('backdrop');
 const input        = document.getElementById('todo-input');
+const noteInput    = document.getElementById('note-input');
 const saveBtn      = document.getElementById('btn-save');
 const dueDateInput = document.getElementById('due-date-input');
 let selectedCat = null;
@@ -653,6 +701,7 @@ let selectedDue = null;
 function openModal() {
   backdrop.classList.add('open');
   input.value = '';
+  noteInput.value = '';
   selectedCat = null;
   selectedDue = null;
   saveBtn.disabled = true;
@@ -661,22 +710,19 @@ function openModal() {
   document.querySelectorAll('.due-chip').forEach(c => c.classList.remove('active'));
   dueDateInput.value = '';
   dueDateInput.classList.add('hidden');
-  // Set min date to today for the date picker
   dueDateInput.min = isoDate(0);
   setTimeout(() => input.focus(), 150);
 }
 
 function closeModal() {
   backdrop.classList.remove('open');
-  input.blur();
-  dueDateInput.blur();
+  input.blur(); noteInput.blur(); dueDateInput.blur();
 }
 
 document.getElementById('btn-open').addEventListener('click', openModal);
 document.getElementById('btn-cancel').addEventListener('click', closeModal);
 backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
 
-// Category
 document.getElementById('cat-grid').addEventListener('click', e => {
   const opt = e.target.closest('.cat-option');
   if (!opt) return;
@@ -687,13 +733,10 @@ document.getElementById('cat-grid').addEventListener('click', e => {
   updateSaveBtn();
 });
 
-// Due date chips
 document.getElementById('due-chips').addEventListener('click', e => {
   const chip = e.target.closest('.due-chip');
   if (!chip) return;
-
   if (chip.id === 'chip-custom') {
-    // Toggle custom date input
     const showing = !dueDateInput.classList.contains('hidden');
     if (showing) {
       dueDateInput.classList.add('hidden');
@@ -702,25 +745,21 @@ document.getElementById('due-chips').addEventListener('click', e => {
       selectedDue = null;
     } else {
       dueDateInput.classList.remove('hidden');
-      chip.classList.add('active');
       document.querySelector('.due-chip[data-offset="1"]').classList.remove('active');
       document.querySelector('.due-chip[data-offset="2"]').classList.remove('active');
+      chip.classList.add('active');
       selectedDue = null;
       setTimeout(() => dueDateInput.focus(), 50);
     }
     return;
   }
-
   const newDue = isoDate(parseInt(chip.dataset.offset));
   if (selectedDue === newDue) {
-    // Deselect
-    selectedDue = null;
-    chip.classList.remove('active');
+    selectedDue = null; chip.classList.remove('active');
   } else {
     selectedDue = newDue;
     document.querySelectorAll('.due-chip').forEach(c => c.classList.remove('active'));
-    dueDateInput.classList.add('hidden');
-    dueDateInput.value = '';
+    dueDateInput.classList.add('hidden'); dueDateInput.value = '';
     chip.classList.add('active');
   }
 });
@@ -735,20 +774,16 @@ dueDateInput.addEventListener('change', e => {
 });
 
 input.addEventListener('input', updateSaveBtn);
-
-function updateSaveBtn() {
-  saveBtn.disabled = !(input.value.trim() && selectedCat);
-}
+function updateSaveBtn() { saveBtn.disabled = !(input.value.trim() && selectedCat); }
 
 saveBtn.addEventListener('click', () => {
   if (!input.value.trim() || !selectedCat) return;
-  addTodo(input.value, selectedCat, selectedDue);
+  addTodo(input.value, selectedCat, selectedDue, noteInput.value);
   closeModal();
 });
-
 input.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !saveBtn.disabled) {
-    addTodo(input.value, selectedCat, selectedDue);
+    addTodo(input.value, selectedCat, selectedDue, noteInput.value);
     closeModal();
   }
 });
@@ -758,8 +793,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
-load();
-render();
+load(); render();
 </script>
 </body>
 </html>
