@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#6366F1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,19 +24,17 @@
       --shadow-lg: 0 10px 25px rgba(0,0,0,.12), 0 4px 10px rgba(0,0,0,.08);
       --radius: 14px;
       --primary: #6366F1;
-      --primary-light: #EEF2FF;
-      --c-haushalt: #3B82F6;
-      --c-haushalt-bg: #EFF6FF;
-      --c-garten: #22C55E;
-      --c-garten-bg: #F0FDF4;
-      --c-druck: #F97316;
-      --c-druck-bg: #FFF7ED;
-      --c-kids: #EC4899;
-      --c-kids-bg: #FDF2F8;
+      --c-haushalt: #3B82F6; --c-haushalt-bg: #EFF6FF;
+      --c-garten:   #22C55E; --c-garten-bg:   #F0FDF4;
+      --c-druck:    #F97316; --c-druck-bg:    #FFF7ED;
+      --c-kids:     #EC4899; --c-kids-bg:     #FDF2F8;
+      --safe-top:    env(safe-area-inset-top,    0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     html, body {
       height: 100%;
+      height: 100dvh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
@@ -44,96 +42,105 @@
       overscroll-behavior: none;
     }
 
-    /* ── Layout ── */
     #app {
+      height: 100%;
+      height: 100dvh;
       max-width: 540px;
       margin: 0 auto;
-      min-height: 100%;
       display: flex;
       flex-direction: column;
     }
 
     /* ── Header ── */
     header {
+      flex-shrink: 0;
       position: sticky;
       top: 0;
       z-index: 10;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: env(safe-area-inset-top, 0) 0 0;
+      padding-top: var(--safe-top);
     }
 
     .header-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px 12px;
+      padding: 14px 20px 10px;
     }
 
     h1 {
       font-size: 22px;
       font-weight: 700;
       letter-spacing: -.4px;
+      line-height: 1.1;
+    }
+
+    .count-badge {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text3);
+      display: block;
+      margin-top: 1px;
     }
 
     .btn-add-header {
-      width: 38px; height: 38px;
+      width: 44px; height: 44px;
       border-radius: 50%;
       background: var(--primary);
       color: #fff;
       border: none;
-      font-size: 22px;
-      line-height: 1;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 8px rgba(99,102,241,.4);
       transition: transform .15s, box-shadow .15s;
       flex-shrink: 0;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
-    .btn-add-header:active { transform: scale(.93); box-shadow: 0 1px 4px rgba(99,102,241,.3); }
+    .btn-add-header:active { transform: scale(.91); box-shadow: 0 1px 4px rgba(99,102,241,.3); }
 
     /* ── Filter tabs ── */
     .filter-scroll {
       overflow-x: auto;
       padding: 0 20px 12px;
       scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
     .filter-scroll::-webkit-scrollbar { display: none; }
 
-    .filter-tabs {
-      display: flex;
-      gap: 8px;
-      width: max-content;
-    }
+    .filter-tabs { display: flex; gap: 8px; width: max-content; }
 
     .filter-tab {
-      padding: 6px 14px;
+      padding: 7px 16px;
       border-radius: 20px;
       border: 1.5px solid var(--border);
       background: var(--surface2);
       color: var(--text2);
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
       cursor: pointer;
       white-space: nowrap;
       transition: all .15s;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      min-height: 36px;
     }
-    .filter-tab.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #fff;
-    }
+    .filter-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
     .filter-tab[data-cat="haushalt"].active { background: var(--c-haushalt); border-color: var(--c-haushalt); }
     .filter-tab[data-cat="garten"].active   { background: var(--c-garten);   border-color: var(--c-garten); }
     .filter-tab[data-cat="druck"].active    { background: var(--c-druck);     border-color: var(--c-druck); }
     .filter-tab[data-cat="kids"].active     { background: var(--c-kids);      border-color: var(--c-kids); }
 
-    /* ── Main content ── */
+    /* ── Main ── */
     main {
       flex: 1;
-      padding: 12px 16px 100px;
+      padding: 12px 16px;
+      padding-bottom: calc(var(--safe-bottom) + 24px);
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .section-label {
@@ -145,12 +152,7 @@
       padding: 4px 4px 8px;
     }
 
-    .todo-list {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
+    .todo-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
 
     /* ── Todo card ── */
     .todo-card {
@@ -159,107 +161,113 @@
       box-shadow: var(--shadow);
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 14px 14px 14px 16px;
-      transition: opacity .2s, transform .15s;
-      position: relative;
-      overflow: hidden;
+      gap: 4px;
+      padding: 12px 12px 12px 4px;
+      transition: opacity .2s;
       -webkit-tap-highlight-color: transparent;
     }
-    .todo-card.done {
-      opacity: .5;
-    }
+    .todo-card.done { opacity: .45; }
+    .todo-card.overdue { border-left: 3px solid #EF4444; }
 
+    /* 44×44 tap target wrapping the visual circle */
     .check-btn {
-      width: 26px; height: 26px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
+      width: 44px; height: 44px;
+      border: none;
       background: none;
       cursor: pointer;
       flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      transition: all .15s;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
     }
-    .check-btn svg { display: none; }
-    .todo-card.done .check-btn {
-      border-color: transparent;
+    .check-ring {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+      flex-shrink: 0;
     }
-    .todo-card.done .check-btn svg { display: block; }
+    .check-ring svg { display: none; }
+    .todo-card.done .check-ring svg { display: block; }
+    .todo-card.done .check-ring { border-color: transparent; }
 
-    .check-btn[data-cat="haushalt"] { border-color: var(--c-haushalt); }
-    .check-btn[data-cat="garten"]   { border-color: var(--c-garten); }
-    .check-btn[data-cat="druck"]    { border-color: var(--c-druck); }
-    .check-btn[data-cat="kids"]     { border-color: var(--c-kids); }
-    .todo-card.done .check-btn[data-cat="haushalt"] { background: var(--c-haushalt); }
-    .todo-card.done .check-btn[data-cat="garten"]   { background: var(--c-garten); }
-    .todo-card.done .check-btn[data-cat="druck"]    { background: var(--c-druck); }
-    .todo-card.done .check-btn[data-cat="kids"]     { background: var(--c-kids); }
+    .check-ring[data-cat="haushalt"] { border-color: var(--c-haushalt); }
+    .check-ring[data-cat="garten"]   { border-color: var(--c-garten); }
+    .check-ring[data-cat="druck"]    { border-color: var(--c-druck); }
+    .check-ring[data-cat="kids"]     { border-color: var(--c-kids); }
+    .todo-card.done .check-ring[data-cat="haushalt"] { background: var(--c-haushalt); }
+    .todo-card.done .check-ring[data-cat="garten"]   { background: var(--c-garten); }
+    .todo-card.done .check-ring[data-cat="druck"]    { background: var(--c-druck); }
+    .todo-card.done .check-ring[data-cat="kids"]     { background: var(--c-kids); }
 
     .todo-body { flex: 1; min-width: 0; }
 
     .todo-title {
       font-size: 15px;
       font-weight: 500;
-      line-height: 1.3;
+      line-height: 1.35;
       word-break: break-word;
-      transition: text-decoration .15s;
     }
-    .todo-card.done .todo-title {
-      text-decoration: line-through;
-      color: var(--text2);
+    .todo-card.done .todo-title { text-decoration: line-through; color: var(--text2); }
+
+    .todo-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 5px;
+      flex-wrap: wrap;
     }
 
     .cat-badge {
-      display: inline-block;
-      margin-top: 4px;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 20px;
     }
     .cat-badge[data-cat="haushalt"] { background: var(--c-haushalt-bg); color: var(--c-haushalt); }
     .cat-badge[data-cat="garten"]   { background: var(--c-garten-bg);   color: var(--c-garten); }
     .cat-badge[data-cat="druck"]    { background: var(--c-druck-bg);     color: var(--c-druck); }
     .cat-badge[data-cat="kids"]     { background: var(--c-kids-bg);      color: var(--c-kids); }
 
+    .due-label {
+      font-size: 11px; font-weight: 600;
+      padding: 2px 8px; border-radius: 20px;
+    }
+    .due-overdue  { background: #FEE2E2; color: #DC2626; }
+    .due-today    { background: #FEF3C7; color: #B45309; }
+    .due-soon     { background: #DCFCE7; color: #15803D; }
+    .due-upcoming { background: #F1F5F9; color: #64748B; }
+
     .delete-btn {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      border: none;
-      background: none;
+      width: 44px; height: 44px;
+      border: none; background: none;
       color: var(--text3);
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      transition: background .15s, color .15s;
+      transition: color .15s;
       -webkit-tap-highlight-color: transparent;
-      font-size: 18px;
+      touch-action: manipulation;
+      user-select: none;
     }
-    .delete-btn:active { background: #FEE2E2; color: #EF4444; }
+    .delete-btn:active { color: #EF4444; }
 
     /* ── Empty state ── */
-    .empty-state {
-      text-align: center;
-      padding: 48px 24px;
-      color: var(--text3);
-    }
+    .empty-state { text-align: center; padding: 60px 24px; color: var(--text3); }
     .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
     .empty-state p { font-size: 15px; }
 
-    /* ── Modal backdrop ── */
+    /* ── Backdrop ── */
     .backdrop {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(15,23,42,.45);
+      background: rgba(15,23,42,.5);
       backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       z-index: 20;
-      animation: fadeIn .2s ease;
     }
     .backdrop.open { display: flex; align-items: flex-end; justify-content: center; }
-
-    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
     @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
 
     /* ── Modal sheet ── */
@@ -268,9 +276,12 @@
       border-radius: 20px 20px 0 0;
       width: 100%;
       max-width: 540px;
-      padding: 0 20px calc(env(safe-area-inset-bottom, 16px) + 16px);
+      max-height: 92dvh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 20px calc(var(--safe-bottom) + 20px);
       box-shadow: var(--shadow-lg);
-      animation: slideUp .25s cubic-bezier(.32,1,.44,1);
+      animation: slideUp .28s cubic-bezier(.32,1,.44,1);
     }
 
     .modal-handle {
@@ -280,20 +291,15 @@
       margin: 12px auto 20px;
     }
 
-    .modal h2 {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 20px;
-    }
+    .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
 
     .field-label {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: .4px;
-      text-transform: uppercase;
-      color: var(--text2);
-      margin-bottom: 8px;
+      font-size: 12px; font-weight: 600;
+      letter-spacing: .4px; text-transform: uppercase;
+      color: var(--text2); margin-bottom: 8px;
+      display: flex; align-items: baseline; gap: 6px;
     }
+    .field-label .opt { font-size: 11px; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--text3); }
 
     .title-input {
       width: 100%;
@@ -315,27 +321,24 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .cat-option {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 14px;
       border-radius: 12px;
       border: 2px solid var(--border);
       background: var(--surface2);
       cursor: pointer;
       transition: all .15s;
       -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      min-height: 48px;
     }
     .cat-option input { display: none; }
-    .cat-dot {
-      width: 12px; height: 12px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
+    .cat-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .cat-option span { font-size: 14px; font-weight: 500; }
 
     .cat-option[data-cat="haushalt"] .cat-dot { background: var(--c-haushalt); }
@@ -348,47 +351,77 @@
     .cat-option[data-cat="druck"].selected    { border-color: var(--c-druck);     background: var(--c-druck-bg); }
     .cat-option[data-cat="kids"].selected     { border-color: var(--c-kids);      background: var(--c-kids-bg); }
 
-    /* ── Modal actions ── */
-    .modal-actions {
+    /* ── Due date picker ── */
+    .due-chips {
       display: flex;
-      gap: 10px;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
     }
+
+    .due-chip {
+      display: flex; align-items: center; gap: 5px;
+      padding: 9px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      color: var(--text2);
+      font-size: 14px; font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      user-select: none;
+      font-family: inherit;
+      min-height: 40px;
+    }
+    .due-chip.active {
+      background: #EEF2FF; border-color: var(--primary); color: var(--primary);
+    }
+
+    .due-date-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 16px; font-family: inherit;
+      color: var(--text);
+      background: var(--surface2);
+      outline: none;
+      margin-bottom: 4px;
+      transition: border-color .15s, max-height .2s;
+    }
+    .due-date-input:focus { border-color: var(--primary); background: #fff; }
+    .due-date-input.hidden { display: none; }
+
+    .due-section { margin-bottom: 20px; }
+
+    /* ── Modal actions ── */
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
 
     .btn-cancel {
-      flex: 1;
-      padding: 13px;
+      flex: 1; padding: 14px;
       border-radius: 12px;
       border: 1.5px solid var(--border);
-      background: none;
-      color: var(--text2);
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
+      background: none; color: var(--text2);
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      touch-action: manipulation; user-select: none;
+      min-height: 50px;
     }
     .btn-save {
-      flex: 2;
-      padding: 13px;
-      border-radius: 12px;
-      border: none;
-      background: var(--primary);
-      color: #fff;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
+      flex: 2; padding: 14px;
+      border-radius: 12px; border: none;
+      background: var(--primary); color: #fff;
+      font-size: 15px; font-weight: 600;
+      cursor: pointer; font-family: inherit;
       box-shadow: 0 2px 8px rgba(99,102,241,.35);
       transition: opacity .15s, transform .1s;
+      touch-action: manipulation; user-select: none;
+      min-height: 50px;
     }
     .btn-save:active { opacity: .85; transform: scale(.98); }
-    .btn-save:disabled { opacity: .4; cursor: not-allowed; box-shadow: none; }
-
-    /* ── Count badge in header ── */
-    .count-badge {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text3);
-    }
+    .btn-save:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
   </style>
 </head>
 <body>
@@ -419,7 +452,7 @@
   <main id="main"></main>
 </div>
 
-<!-- Add-Todo Modal -->
+<!-- Modal -->
 <div class="backdrop" id="backdrop">
   <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-handle"></div>
@@ -433,24 +466,36 @@
     <div class="cat-grid" id="cat-grid">
       <label class="cat-option" data-cat="haushalt">
         <input type="radio" name="cat" value="haushalt">
-        <span class="cat-dot"></span>
-        <span>Haushalt</span>
+        <span class="cat-dot"></span><span>Haushalt</span>
       </label>
       <label class="cat-option" data-cat="garten">
         <input type="radio" name="cat" value="garten">
-        <span class="cat-dot"></span>
-        <span>Garten</span>
+        <span class="cat-dot"></span><span>Garten</span>
       </label>
       <label class="cat-option" data-cat="druck">
         <input type="radio" name="cat" value="druck">
-        <span class="cat-dot"></span>
-        <span>3D Druck</span>
+        <span class="cat-dot"></span><span>3D Druck</span>
       </label>
       <label class="cat-option" data-cat="kids">
         <input type="radio" name="cat" value="kids">
-        <span class="cat-dot"></span>
-        <span>Kids</span>
+        <span class="cat-dot"></span><span>Kids</span>
       </label>
+    </div>
+
+    <div class="field-label">Fälligkeit <span class="opt">(optional)</span></div>
+    <div class="due-section">
+      <div class="due-chips" id="due-chips">
+        <button class="due-chip" data-offset="1">Morgen</button>
+        <button class="due-chip" data-offset="2">Übermorgen</button>
+        <button class="due-chip" id="chip-custom">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <rect x="1" y="2" width="11" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M4 1v2M9 1v2M1 5h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          Datum
+        </button>
+      </div>
+      <input type="date" class="due-date-input hidden" id="due-date-input">
     </div>
 
     <div class="modal-actions">
@@ -461,12 +506,7 @@
 </div>
 
 <script>
-const CATS = {
-  haushalt: 'Haushalt',
-  garten:   'Garten',
-  druck:    '3D Druck',
-  kids:     'Kids',
-};
+const CATS = { haushalt:'Haushalt', garten:'Garten', druck:'3D Druck', kids:'Kids' };
 
 let todos = [];
 let filter = 'all';
@@ -475,15 +515,20 @@ function load() {
   try { todos = JSON.parse(localStorage.getItem('todos') || '[]'); }
   catch { todos = []; }
 }
+function save() { localStorage.setItem('todos', JSON.stringify(todos)); }
 
-function save() {
-  localStorage.setItem('todos', JSON.stringify(todos));
+// Returns YYYY-MM-DD for today + offsetDays, in local time
+function isoDate(offsetDays = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
 }
 
-function addTodo(title, cat) {
-  todos.unshift({ id: Date.now().toString(36), title: title.trim(), cat, done: false });
-  save();
-  render();
+function addTodo(title, cat, due) {
+  todos.unshift({ id: Date.now().toString(36), title: title.trim(), cat, due: due || null, done: false });
+  save(); render();
 }
 
 function toggle(id) {
@@ -493,64 +538,87 @@ function toggle(id) {
 
 function remove(id) {
   todos = todos.filter(t => t.id !== id);
-  save();
-  render();
+  save(); render();
 }
 
-// ── Render ──────────────────────────────────────────
+// ── Due date helpers ──────────────────────────────────
+function dueLabelInfo(due) {
+  if (!due) return null;
+  const today = isoDate(0);
+  if (due < today)           return { text: 'Überfällig', cls: 'overdue' };
+  if (due === today)         return { text: 'Heute',      cls: 'today' };
+  if (due === isoDate(1))    return { text: 'Morgen',     cls: 'soon' };
+  if (due === isoDate(2))    return { text: 'Übermorgen', cls: 'soon' };
+  const d = new Date(due + 'T12:00:00');
+  return { text: d.toLocaleDateString('de-DE', { weekday:'short', day:'numeric', month:'short' }), cls: 'upcoming' };
+}
+
+function sortByDue(arr) {
+  const today = isoDate(0);
+  return [...arr].sort((a, b) => {
+    const ad = a.due, bd = b.due;
+    if (!ad && !bd) return 0;
+    if (!ad) return 1;
+    if (!bd) return -1;
+    if (ad < today && bd >= today) return -1;
+    if (bd < today && ad >= today) return 1;
+    return ad < bd ? -1 : ad > bd ? 1 : 0;
+  });
+}
+
+// ── Render ────────────────────────────────────────────
 function render() {
   const main = document.getElementById('main');
   const filtered = filter === 'all' ? todos : todos.filter(t => t.cat === filter);
-  const open = filtered.filter(t => !t.done);
+  const open = sortByDue(filtered.filter(t => !t.done));
   const done = filtered.filter(t => t.done);
 
-  const total = todos.filter(t => !t.done).length;
+  const totalOpen = todos.filter(t => !t.done).length;
   document.getElementById('count-label').textContent =
-    total > 0 ? `${total} offen` : 'Alles erledigt ✓';
+    totalOpen > 0 ? `${totalOpen} offen` : 'Alles erledigt ✓';
 
   if (filtered.length === 0) {
-    main.innerHTML = `
-      <div class="empty-state">
-        <div class="icon">📋</div>
-        <p>${filter === 'all' ? 'Noch keine Aufgaben.' : 'Keine Aufgaben in dieser Kategorie.'}</p>
-      </div>`;
+    main.innerHTML = `<div class="empty-state">
+      <div class="icon">📋</div>
+      <p>${filter === 'all' ? 'Noch keine Aufgaben.' : 'Keine Aufgaben in dieser Kategorie.'}</p>
+    </div>`;
     return;
   }
 
   let html = '';
-
-  if (open.length > 0) {
+  if (open.length > 0)
     html += `<div class="section-label">Offen (${open.length})</div>
              <div class="todo-list">${open.map(cardHTML).join('')}</div>`;
-  }
-
-  if (done.length > 0) {
+  if (done.length > 0)
     html += `<div class="section-label">Erledigt (${done.length})</div>
              <div class="todo-list">${done.map(cardHTML).join('')}</div>`;
-  }
 
   main.innerHTML = html;
-
-  main.querySelectorAll('.check-btn').forEach(btn => {
-    btn.addEventListener('click', () => toggle(btn.dataset.id));
-  });
-  main.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', () => remove(btn.dataset.id));
-  });
+  main.querySelectorAll('.check-btn').forEach(btn =>
+    btn.addEventListener('click', () => toggle(btn.dataset.id)));
+  main.querySelectorAll('.delete-btn').forEach(btn =>
+    btn.addEventListener('click', () => remove(btn.dataset.id)));
 }
 
 function cardHTML(t) {
   const label = CATS[t.cat] || t.cat;
+  const due = dueLabelInfo(t.due);
+  const overdueCls = !t.done && due?.cls === 'overdue' ? ' overdue' : '';
   return `
-    <div class="todo-card${t.done ? ' done' : ''}">
-      <button class="check-btn" data-id="${t.id}" data-cat="${t.cat}" aria-label="Erledigt umschalten">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-          <path d="M2.5 7l3.5 3.5 5.5-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+    <div class="todo-card${t.done ? ' done' : ''}${overdueCls}">
+      <button class="check-btn" data-id="${t.id}" aria-label="Erledigt umschalten">
+        <span class="check-ring" data-cat="${t.cat}">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2.5 7l3.5 3.5 5.5-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
       </button>
       <div class="todo-body">
         <div class="todo-title">${escHtml(t.title)}</div>
-        <span class="cat-badge" data-cat="${t.cat}">${label}</span>
+        <div class="todo-meta">
+          <span class="cat-badge" data-cat="${t.cat}">${label}</span>
+          ${due ? `<span class="due-label due-${due.cls}">${due.text}</span>` : ''}
+        </div>
       </div>
       <button class="delete-btn" data-id="${t.id}" aria-label="Löschen">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -564,7 +632,7 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Filter tabs ──────────────────────────────────────
+// ── Filter tabs ───────────────────────────────────────
 document.getElementById('filter-tabs').addEventListener('click', e => {
   const tab = e.target.closest('.filter-tab');
   if (!tab) return;
@@ -574,32 +642,41 @@ document.getElementById('filter-tabs').addEventListener('click', e => {
   render();
 });
 
-// ── Modal ────────────────────────────────────────────
-const backdrop = document.getElementById('backdrop');
-const input    = document.getElementById('todo-input');
-const saveBtn  = document.getElementById('btn-save');
+// ── Modal ─────────────────────────────────────────────
+const backdrop     = document.getElementById('backdrop');
+const input        = document.getElementById('todo-input');
+const saveBtn      = document.getElementById('btn-save');
+const dueDateInput = document.getElementById('due-date-input');
 let selectedCat = null;
+let selectedDue = null;
 
 function openModal() {
   backdrop.classList.add('open');
   input.value = '';
   selectedCat = null;
+  selectedDue = null;
   saveBtn.disabled = true;
   document.querySelectorAll('.cat-option').forEach(o => o.classList.remove('selected'));
   document.querySelectorAll('input[name="cat"]').forEach(r => r.checked = false);
-  setTimeout(() => input.focus(), 100);
+  document.querySelectorAll('.due-chip').forEach(c => c.classList.remove('active'));
+  dueDateInput.value = '';
+  dueDateInput.classList.add('hidden');
+  // Set min date to today for the date picker
+  dueDateInput.min = isoDate(0);
+  setTimeout(() => input.focus(), 150);
 }
 
 function closeModal() {
   backdrop.classList.remove('open');
   input.blur();
+  dueDateInput.blur();
 }
 
 document.getElementById('btn-open').addEventListener('click', openModal);
 document.getElementById('btn-cancel').addEventListener('click', closeModal);
 backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
 
-// Category selection
+// Category
 document.getElementById('cat-grid').addEventListener('click', e => {
   const opt = e.target.closest('.cat-option');
   if (!opt) return;
@@ -610,6 +687,53 @@ document.getElementById('cat-grid').addEventListener('click', e => {
   updateSaveBtn();
 });
 
+// Due date chips
+document.getElementById('due-chips').addEventListener('click', e => {
+  const chip = e.target.closest('.due-chip');
+  if (!chip) return;
+
+  if (chip.id === 'chip-custom') {
+    // Toggle custom date input
+    const showing = !dueDateInput.classList.contains('hidden');
+    if (showing) {
+      dueDateInput.classList.add('hidden');
+      dueDateInput.value = '';
+      chip.classList.remove('active');
+      selectedDue = null;
+    } else {
+      dueDateInput.classList.remove('hidden');
+      chip.classList.add('active');
+      document.querySelector('.due-chip[data-offset="1"]').classList.remove('active');
+      document.querySelector('.due-chip[data-offset="2"]').classList.remove('active');
+      selectedDue = null;
+      setTimeout(() => dueDateInput.focus(), 50);
+    }
+    return;
+  }
+
+  const newDue = isoDate(parseInt(chip.dataset.offset));
+  if (selectedDue === newDue) {
+    // Deselect
+    selectedDue = null;
+    chip.classList.remove('active');
+  } else {
+    selectedDue = newDue;
+    document.querySelectorAll('.due-chip').forEach(c => c.classList.remove('active'));
+    dueDateInput.classList.add('hidden');
+    dueDateInput.value = '';
+    chip.classList.add('active');
+  }
+});
+
+dueDateInput.addEventListener('change', e => {
+  selectedDue = e.target.value || null;
+  if (selectedDue) {
+    document.querySelector('.due-chip[data-offset="1"]').classList.remove('active');
+    document.querySelector('.due-chip[data-offset="2"]').classList.remove('active');
+    document.getElementById('chip-custom').classList.add('active');
+  }
+});
+
 input.addEventListener('input', updateSaveBtn);
 
 function updateSaveBtn() {
@@ -618,23 +742,22 @@ function updateSaveBtn() {
 
 saveBtn.addEventListener('click', () => {
   if (!input.value.trim() || !selectedCat) return;
-  addTodo(input.value, selectedCat);
+  addTodo(input.value, selectedCat, selectedDue);
   closeModal();
 });
 
 input.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !saveBtn.disabled) {
-    addTodo(input.value, selectedCat);
+    addTodo(input.value, selectedCat, selectedDue);
     closeModal();
   }
 });
 
-// ── PWA Service Worker ───────────────────────────────
+// ── PWA ───────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
-// ── Init ─────────────────────────────────────────────
 load();
 render();
 </script>
