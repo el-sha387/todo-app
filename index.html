@@ -103,7 +103,15 @@
     .star-btn { font-size: 17px; line-height: 1; background: none; border: none; cursor: pointer; color: var(--text3); padding: 1px 2px; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: color .15s, transform .15s; }
     .star-btn.active { color: #F59E0B; }
     .star-btn:active { transform: scale(1.25); }
-    .todo-note { font-size: 13px; color: var(--text2); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .note-area {
+      display: flex; align-items: center; gap: 5px; margin-top: 3px;
+      background: none; border: none; padding: 0; cursor: pointer;
+      text-align: left; width: 100%; max-width: 100%;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    .todo-note { font-size: 13px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+    .note-edit-icon { font-size: 11px; color: var(--text3); flex-shrink: 0; line-height: 1; }
+    .add-note-hint { font-size: 12px; color: var(--text3); }
     .todo-meta { display: flex; align-items: center; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
 
     .cat-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
@@ -293,6 +301,21 @@
     <div class="modal-actions">
       <button class="btn-cancel" id="btn-cancel">Abbrechen</button>
       <button class="btn-primary" id="btn-save" disabled>Hinzufügen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Note Modal -->
+<div class="backdrop" id="edit-note-backdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-handle"></div>
+    <h2>Notiz</h2>
+    <div id="edit-note-context" style="font-size:13px;color:var(--text2);margin-bottom:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+    <div class="field-label">Notiz <span class="opt">(optional)</span></div>
+    <input type="text" class="text-input sm" id="edit-note-input" placeholder="Notiz hinzufügen..." maxlength="120" autocomplete="off">
+    <div class="modal-actions">
+      <button class="btn-cancel" id="edit-note-cancel">Abbrechen</button>
+      <button class="btn-primary" id="edit-note-save">Speichern</button>
     </div>
   </div>
 </div>
@@ -491,6 +514,7 @@ function render() {
   main.querySelectorAll('.check-btn').forEach(b  => b.addEventListener('click', () => toggle(b.dataset.id)));
   main.querySelectorAll('.star-btn').forEach(b   => b.addEventListener('click', () => toggleImportant(b.dataset.id)));
   main.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', () => remove(b.dataset.id)));
+  main.querySelectorAll('.note-area').forEach(b  => b.addEventListener('click', () => openEditNote(b.dataset.id)));
   main.querySelectorAll('.todo-wrap').forEach(wrap => {
     const card = wrap.querySelector('.todo-card');
     initSwipe(card, wrap.querySelector('.swipe-bg-right'), wrap.querySelector('.swipe-bg-left'),
@@ -525,7 +549,11 @@ function cardHTML(t) {
           <div class="todo-title">${escHtml(t.title)}</div>
           <button class="star-btn${t.important?' active':''}" data-id="${t.id}" aria-label="Wichtig">${t.important?'★':'☆'}</button>
         </div>
-        ${t.note ? `<div class="todo-note">${escHtml(t.note)}</div>` : ''}
+        <button class="note-area" data-id="${t.id}" aria-label="Notiz bearbeiten">
+          ${t.note
+            ? `<span class="todo-note">${escHtml(t.note)}</span><span class="note-edit-icon">✏</span>`
+            : `<span class="add-note-hint">+ Notiz</span>`}
+        </button>
         <div class="todo-meta">
           <span class="cat-badge" style="background:${bg};color:${color}">${escHtml(label)}</span>
           ${due ? `<span class="due-label due-${due.cls}">${due.text}</span>` : ''}
@@ -817,6 +845,34 @@ document.getElementById('btn-new-cat-save').addEventListener('click', () => {
   document.getElementById('new-cat-name').value = '';
   document.getElementById('btn-new-cat-save').disabled = true;
 });
+
+// ── Notiz bearbeiten ─────────────────────────────────
+let editNoteId = null;
+
+function openEditNote(id) {
+  const t = todos.find(t => t.id === id);
+  if (!t) return;
+  editNoteId = id;
+  document.getElementById('edit-note-context').textContent = t.title;
+  document.getElementById('edit-note-input').value = t.note || '';
+  document.getElementById('edit-note-backdrop').classList.add('open');
+  setTimeout(() => document.getElementById('edit-note-input').focus(), 150);
+}
+function closeEditNote() {
+  document.getElementById('edit-note-backdrop').classList.remove('open');
+  document.getElementById('edit-note-input').blur();
+  editNoteId = null;
+}
+function saveNote() {
+  const t = todos.find(t => t.id === editNoteId);
+  if (t) { t.note = document.getElementById('edit-note-input').value.trim() || null; save(); render(); }
+  closeEditNote();
+}
+
+document.getElementById('edit-note-cancel').addEventListener('click', closeEditNote);
+document.getElementById('edit-note-save').addEventListener('click', saveNote);
+document.getElementById('edit-note-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('edit-note-backdrop')) closeEditNote(); });
+document.getElementById('edit-note-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveNote(); });
 
 // ── PWA ───────────────────────────────────────────────
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
