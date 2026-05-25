@@ -187,11 +187,10 @@
       display: flex; align-items: center; gap: 12px;
       background: var(--surface2); border-radius: 12px;
       padding: 13px 14px; border: 1.5px solid var(--border);
-      transition: opacity .15s, box-shadow .15s;
+      transition: transform .18s ease, opacity .15s;
       user-select: none;
     }
-    .settings-cat-row.drag-source { opacity: .35; }
-    .settings-cat-row.drag-over   { border-color: var(--primary); }
+    .settings-cat-row.drag-source { opacity: .3; transition: opacity .15s; }
     .drag-handle {
       color: var(--text3); cursor: grab; touch-action: none;
       display: flex; align-items: center; padding: 4px;
@@ -708,16 +707,18 @@ function renderSettingsCatList() {
 
 // ── Settings: drag & drop ─────────────────────────────
 function initSettingsDrag(list) {
-  let drag = null;
-
   list.addEventListener('touchstart', e => {
     const handle = e.target.closest('.drag-handle');
     if (!handle) return;
-    const row = handle.closest('.settings-cat-row');
-    const rows = [...list.querySelectorAll('.settings-cat-row')];
+    const row   = handle.closest('.settings-cat-row');
+    const rows  = [...list.querySelectorAll('.settings-cat-row')];
     const fromIdx = parseInt(row.dataset.index);
-    const rect = row.getBoundingClientRect();
+    const rect  = row.getBoundingClientRect();
     const offsetY = e.touches[0].clientY - rect.top;
+
+    // Positionen EINMALIG vor dem Drag erfassen — Live-Reads führen zu Oszillation
+    const rowRects = rows.map(r => r.getBoundingClientRect());
+    const rowH = rect.height + 8; // Höhe + Gap
 
     const ghost = row.cloneNode(true);
     Object.assign(ghost.style, {
@@ -728,28 +729,30 @@ function initSettingsDrag(list) {
     });
     document.body.appendChild(ghost);
     row.classList.add('drag-source');
-
-    drag = { row, ghost, fromIdx, toIdx: fromIdx, offsetY, rows };
+    let toIdx = fromIdx;
     e.preventDefault();
 
     function onMove(ev) {
       const y = ev.touches[0].clientY;
       ghost.style.top = (y - offsetY) + 'px';
-      let newTo = drag.fromIdx;
-      drag.rows.forEach((r, i) => {
-        if (r === row) return;
-        const rc = r.getBoundingClientRect();
-        if (y > rc.top + rc.height / 2) newTo = i;
+
+      // Ziel-Index mit fixen Original-Positionen berechnen
+      let newTo = 0;
+      rowRects.forEach((rc, i) => {
+        if (i === fromIdx) return;
+        if (y >= rc.top + rc.height / 2) newTo = i;
       });
-      if (newTo !== drag.toIdx) {
-        drag.toIdx = newTo;
-        const h = row.getBoundingClientRect().height + 8;
-        drag.rows.forEach((r, i) => {
+
+      if (newTo !== toIdx) {
+        toIdx = newTo;
+        rows.forEach((r, i) => {
           if (r === row) { r.style.transform = ''; return; }
-          const from = drag.fromIdx, to = drag.toIdx;
-          if (from < to && i > from && i <= to)       r.style.transform = `translateY(-${h}px)`;
-          else if (from > to && i >= to && i < from)  r.style.transform = `translateY(${h}px)`;
-          else                                         r.style.transform = '';
+          if (fromIdx < toIdx && i > fromIdx && i <= toIdx)
+            r.style.transform = `translateY(-${rowH}px)`;
+          else if (fromIdx > toIdx && i >= toIdx && i < fromIdx)
+            r.style.transform = `translateY(${rowH}px)`;
+          else
+            r.style.transform = '';
         });
       }
       ev.preventDefault();
@@ -758,9 +761,8 @@ function initSettingsDrag(list) {
     function onEnd() {
       ghost.remove();
       row.classList.remove('drag-source');
-      drag.rows.forEach(r => { r.style.transform = ''; });
-      if (drag.toIdx !== drag.fromIdx) reorderCat(drag.fromIdx, drag.toIdx);
-      drag = null;
+      rows.forEach(r => { r.style.transform = ''; });
+      if (toIdx !== fromIdx) reorderCat(fromIdx, toIdx);
       document.removeEventListener('touchmove', onMove);
       document.removeEventListener('touchend', onEnd);
     }
