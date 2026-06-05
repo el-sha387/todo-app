@@ -53,6 +53,16 @@
     .btn-add-header { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(99,102,241,.4); }
     .btn-add-header:active { transform: scale(.91); box-shadow: 0 1px 4px rgba(99,102,241,.3); }
 
+    /* ── Workspace switcher ── */
+    .workspace-switcher { display: flex; margin: 0 20px 8px; background: var(--surface2); border-radius: 10px; padding: 3px; gap: 0; }
+    .ws-btn {
+      flex: 1; padding: 8px 12px; border-radius: 8px; border: none; background: none;
+      color: var(--text2); font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background .15s, color .15s, box-shadow .15s;
+      font-family: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    .ws-btn.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+
     /* ── Filter tabs ── */
     .filter-scroll { overflow-x: auto; padding: 0 20px 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
     .filter-scroll::-webkit-scrollbar { display: none; }
@@ -265,6 +275,10 @@
         </button>
       </div>
     </div>
+    <div class="workspace-switcher" id="workspace-switcher">
+      <button class="ws-btn active" data-ws="work">Arbeit</button>
+      <button class="ws-btn" data-ws="personal">Privat</button>
+    </div>
     <div class="filter-scroll">
       <div class="filter-tabs" id="filter-tabs"></div>
     </div>
@@ -348,7 +362,13 @@
 
 <script>
 // ── Constants ──────────────────────────────────────────
-const DEFAULT_CATS = [
+const DEFAULT_CATS_WORK = [
+  { id: 'sales',     label: 'Sales',     color: '#6366F1' },
+  { id: 'mails',     label: 'Mails',     color: '#3B82F6' },
+  { id: 'liqui',     label: 'Liqui',     color: '#22C55E' },
+  { id: 'sonstiges', label: 'Sonstiges', color: '#64748B' },
+];
+const DEFAULT_CATS_PERSONAL = [
   { id: 'haushalt', label: 'Haushalt', color: '#3B82F6' },
   { id: 'garten',   label: 'Garten',   color: '#22C55E' },
   { id: 'druck',    label: '3D Druck', color: '#F97316' },
@@ -361,20 +381,22 @@ let todos      = [];
 let categories = [];
 let filter     = 'all';
 let confirmDeleteCat = null; // id awaiting second tap
+let workspace  = 'work';    // 'work' | 'personal'
 
 // ── Persistence ───────────────────────────────────────
 function load() {
-  try { todos = JSON.parse(localStorage.getItem('todos') || '[]'); } catch { todos = []; }
+  try { todos = JSON.parse(localStorage.getItem('todos_' + workspace) || '[]'); } catch { todos = []; }
 }
-function save() { localStorage.setItem('todos', JSON.stringify(todos)); }
+function save() { localStorage.setItem('todos_' + workspace, JSON.stringify(todos)); }
 
 function loadCats() {
+  const defaults = workspace === 'work' ? DEFAULT_CATS_WORK : DEFAULT_CATS_PERSONAL;
   try {
-    const s = localStorage.getItem('categories');
-    categories = s ? JSON.parse(s) : [...DEFAULT_CATS];
-  } catch { categories = [...DEFAULT_CATS]; }
+    const s = localStorage.getItem('categories_' + workspace);
+    categories = s ? JSON.parse(s) : [...defaults];
+  } catch { categories = [...defaults]; }
 }
-function saveCats() { localStorage.setItem('categories', JSON.stringify(categories)); }
+function saveCats() { localStorage.setItem('categories_' + workspace, JSON.stringify(categories)); }
 
 // ── Helpers ───────────────────────────────────────────
 function isoDate(offset = 0) {
@@ -404,6 +426,22 @@ function uniqueCatId(label) {
     .replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'').slice(0,20) || 'cat';
   if (!categories.find(c => c.id === base)) return base;
   return base + '_' + Date.now().toString(36).slice(-4);
+}
+
+// ── Migration v1 → v2 ────────────────────────────────
+function migrateIfNeeded() {
+  if (localStorage.getItem('_migrated_v2')) return;
+  const oldTodos = localStorage.getItem('todos');
+  const oldCats  = localStorage.getItem('categories');
+  if (oldTodos) {
+    localStorage.setItem('todos_personal',   oldTodos); // Daten → Privat
+    localStorage.setItem('todos_backup',     oldTodos); // Sicherungskopie
+  }
+  if (oldCats) {
+    localStorage.setItem('categories_personal', oldCats);
+    localStorage.setItem('categories_backup',   oldCats); // Sicherungskopie
+  }
+  localStorage.setItem('_migrated_v2', '1');
 }
 
 // ── Todo mutations ────────────────────────────────────
@@ -604,6 +642,29 @@ function initSwipe(card, bgR, bgL, id, isDone) {
     dx = 0; active = false;
   }, { passive: true });
 }
+
+// ── Workspace ─────────────────────────────────────────
+function updateWorkspaceSwitcher() {
+  document.querySelectorAll('.ws-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.ws === workspace)
+  );
+}
+
+function switchWorkspace(ws) {
+  if (ws === workspace) return;
+  workspace = ws;
+  filter = 'all';
+  confirmDeleteCat = null;
+  localStorage.setItem('workspace', ws);
+  load(); loadCats();
+  updateWorkspaceSwitcher();
+  render(); renderCatGrid();
+}
+
+document.getElementById('workspace-switcher').addEventListener('click', e => {
+  const btn = e.target.closest('.ws-btn');
+  if (btn) switchWorkspace(btn.dataset.ws);
+});
 
 // ── Filter tab clicks ─────────────────────────────────
 document.getElementById('filter-tabs').addEventListener('click', e => {
@@ -878,7 +939,10 @@ document.getElementById('edit-note-input').addEventListener('keydown', e => { if
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
 // ── Init ─────────────────────────────────────────────
+migrateIfNeeded();
+workspace = localStorage.getItem('workspace') || 'work';
 load(); loadCats(); render(); renderCatGrid();
+updateWorkspaceSwitcher();
 </script>
 </body>
 </html>
