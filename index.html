@@ -108,7 +108,7 @@
 
     .todo-body { flex: 1; min-width: 0; }
     .title-row { display: flex; align-items: flex-start; gap: 6px; }
-    .todo-title { flex: 1; font-size: 15px; font-weight: 500; line-height: 1.35; word-break: break-word; }
+    .todo-title { flex: 1; font-size: 15px; font-weight: 500; line-height: 1.35; word-break: break-word; cursor: pointer; }
     .todo-card.done .todo-title { text-decoration: line-through; color: var(--text2); }
     .star-btn { font-size: 17px; line-height: 1; background: none; border: none; cursor: pointer; color: var(--text3); padding: 1px 2px; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: color .15s, transform .15s; }
     .star-btn.active { color: #F59E0B; }
@@ -300,6 +300,7 @@
     <div class="field-label">Fälligkeit <span class="opt">(optional)</span></div>
     <div class="due-section">
       <div class="due-chips" id="due-chips">
+        <button class="due-chip" data-offset="0">Heute</button>
         <button class="due-chip" data-offset="1">Morgen</button>
         <button class="due-chip" data-offset="2">Übermorgen</button>
         <button class="due-chip" id="chip-custom">
@@ -553,6 +554,7 @@ function render() {
   main.querySelectorAll('.star-btn').forEach(b   => b.addEventListener('click', () => toggleImportant(b.dataset.id)));
   main.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', () => remove(b.dataset.id)));
   main.querySelectorAll('.note-area').forEach(b  => b.addEventListener('click', () => openEditNote(b.dataset.id)));
+  main.querySelectorAll('.todo-title').forEach(b => b.addEventListener('click', () => openModal(b.dataset.id)));
   main.querySelectorAll('.todo-wrap').forEach(wrap => {
     const card = wrap.querySelector('.todo-card');
     initSwipe(card, wrap.querySelector('.swipe-bg-right'), wrap.querySelector('.swipe-bg-left'),
@@ -584,7 +586,7 @@ function cardHTML(t) {
       </button>
       <div class="todo-body">
         <div class="title-row">
-          <div class="todo-title">${escHtml(t.title)}</div>
+          <div class="todo-title" data-id="${t.id}">${escHtml(t.title)}</div>
           <button class="star-btn${t.important?' active':''}" data-id="${t.id}" aria-label="Wichtig">${t.important?'★':'☆'}</button>
         </div>
         <button class="note-area" data-id="${t.id}" aria-label="Notiz bearbeiten">
@@ -681,22 +683,67 @@ const noteInput    = document.getElementById('note-input');
 const saveBtn      = document.getElementById('btn-save');
 const dueDateInput = document.getElementById('due-date-input');
 let selectedCat = null, selectedDue = null, selectedCatColor = null;
+let editTodoId = null; // null = Neu anlegen, sonst ID der bearbeiteten Aufgabe
+const modalTitle = document.getElementById('modal-title');
 
-function openModal() {
-  backdrop.classList.add('open');
-  input.value = ''; noteInput.value = '';
-  selectedCat = null; selectedDue = null; selectedCatColor = null;
-  saveBtn.disabled = true;
-  renderCatGrid();
+// Kategorie in der Modal-Auswahl markieren
+function selectCatUI(catId) {
+  selectedCat = null; selectedCatColor = null;
   document.querySelectorAll('.cat-option').forEach(o => { o.style.borderColor=''; o.style.background=''; });
+  if (!catId) return;
+  const opt = document.querySelector(`.cat-option[data-cat="${catId}"]`);
+  if (!opt) return;
+  selectedCat = catId; selectedCatColor = opt.dataset.color;
+  opt.style.borderColor = selectedCatColor;
+  opt.style.background  = catBg(selectedCatColor);
+  const radio = opt.querySelector('input'); if (radio) radio.checked = true;
+}
+
+// Fälligkeits-Chips/Datum nach Wert setzen
+function setDueUI(due) {
   document.querySelectorAll('.due-chip').forEach(c => c.classList.remove('active'));
   dueDateInput.value = ''; dueDateInput.classList.add('hidden');
-  dueDateInput.min = isoDate(0);
+  selectedDue = due || null;
+  if (!due) return;
+  const chip = due === isoDate(0) ? document.querySelector('.due-chip[data-offset="0"]')
+             : due === isoDate(1) ? document.querySelector('.due-chip[data-offset="1"]')
+             : due === isoDate(2) ? document.querySelector('.due-chip[data-offset="2"]')
+             : null;
+  if (chip) { chip.classList.add('active'); }
+  else { dueDateInput.value = due; dueDateInput.classList.remove('hidden'); document.getElementById('chip-custom').classList.add('active'); }
+}
+
+function openModal(editId) {
+  backdrop.classList.add('open');
+  renderCatGrid();
+  editTodoId = (typeof editId === 'string') ? editId : null;
+  const t = editTodoId ? todos.find(x => x.id === editTodoId) : null;
+  if (t) {
+    modalTitle.textContent = 'Aufgabe bearbeiten';
+    saveBtn.textContent = 'Speichern';
+    input.value = t.title;
+    noteInput.value = t.note || '';
+    dueDateInput.min = ''; // beim Bearbeiten auch vergangene Termine zulassen
+    selectCatUI(t.cat);
+    setDueUI(t.due);
+    updateSaveBtn();
+  } else {
+    editTodoId = null;
+    modalTitle.textContent = 'Neue Aufgabe';
+    saveBtn.textContent = 'Hinzufügen';
+    input.value = ''; noteInput.value = '';
+    selectedCat = null; selectedDue = null; selectedCatColor = null;
+    saveBtn.disabled = true;
+    document.querySelectorAll('.cat-option').forEach(o => { o.style.borderColor=''; o.style.background=''; });
+    document.querySelectorAll('.due-chip').forEach(c => c.classList.remove('active'));
+    dueDateInput.value = ''; dueDateInput.classList.add('hidden');
+    dueDateInput.min = isoDate(0);
+  }
   setTimeout(() => input.focus(), 150);
 }
-function closeModal() { backdrop.classList.remove('open'); input.blur(); noteInput.blur(); dueDateInput.blur(); }
+function closeModal() { backdrop.classList.remove('open'); editTodoId = null; input.blur(); noteInput.blur(); dueDateInput.blur(); }
 
-document.getElementById('btn-open').addEventListener('click', openModal);
+document.getElementById('btn-open').addEventListener('click', () => openModal());
 document.getElementById('btn-cancel').addEventListener('click', closeModal);
 backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
 
@@ -718,7 +765,7 @@ document.getElementById('due-chips').addEventListener('click', e => {
   if (chip.id === 'chip-custom') {
     const showing = !dueDateInput.classList.contains('hidden');
     if (showing) { dueDateInput.classList.add('hidden'); dueDateInput.value=''; chip.classList.remove('active'); selectedDue=null; }
-    else { dueDateInput.classList.remove('hidden'); document.querySelector('.due-chip[data-offset="1"]').classList.remove('active'); document.querySelector('.due-chip[data-offset="2"]').classList.remove('active'); chip.classList.add('active'); selectedDue=null; setTimeout(()=>dueDateInput.focus(),50); }
+    else { dueDateInput.classList.remove('hidden'); document.querySelectorAll('.due-chip[data-offset]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); selectedDue=null; setTimeout(()=>dueDateInput.focus(),50); }
     return;
   }
   const newDue = isoDate(parseInt(chip.dataset.offset));
@@ -728,13 +775,29 @@ document.getElementById('due-chips').addEventListener('click', e => {
 
 dueDateInput.addEventListener('change', e => {
   selectedDue = e.target.value || null;
-  if (selectedDue) { document.querySelector('.due-chip[data-offset="1"]').classList.remove('active'); document.querySelector('.due-chip[data-offset="2"]').classList.remove('active'); document.getElementById('chip-custom').classList.add('active'); }
+  if (selectedDue) { document.querySelectorAll('.due-chip[data-offset]').forEach(c=>c.classList.remove('active')); document.getElementById('chip-custom').classList.add('active'); }
 });
 
 input.addEventListener('input', updateSaveBtn);
 function updateSaveBtn() { saveBtn.disabled = !(input.value.trim() && selectedCat); }
-saveBtn.addEventListener('click', () => { if (!input.value.trim()||!selectedCat) return; addTodo(input.value, selectedCat, selectedDue, noteInput.value); closeModal(); });
-input.addEventListener('keydown', e => { if (e.key==='Enter'&&!saveBtn.disabled) { addTodo(input.value,selectedCat,selectedDue,noteInput.value); closeModal(); } });
+function commitModal() {
+  if (!input.value.trim() || !selectedCat) return;
+  if (editTodoId) {
+    const t = todos.find(x => x.id === editTodoId);
+    if (t) {
+      t.title = input.value.trim();
+      t.cat   = selectedCat;
+      t.due   = selectedDue || null;
+      t.note  = noteInput.value.trim() || null;
+      save(); render();
+    }
+  } else {
+    addTodo(input.value, selectedCat, selectedDue, noteInput.value);
+  }
+  closeModal();
+}
+saveBtn.addEventListener('click', commitModal);
+input.addEventListener('keydown', e => { if (e.key==='Enter' && !saveBtn.disabled) commitModal(); });
 
 // ── Settings modal ────────────────────────────────────
 const settingsBackdrop = document.getElementById('settings-backdrop');

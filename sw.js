@@ -1,4 +1,4 @@
-const CACHE = 'todos-v1';
+const CACHE = 'todos-v2';
 const ASSETS = ['./index.html', './manifest.json'];
 
 self.addEventListener('install', e => {
