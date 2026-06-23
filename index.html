@@ -251,6 +251,61 @@
     .color-swatch:active { transform: scale(1.1); }
 
     .settings-divider { height: 1px; background: var(--border); margin: 4px 0 20px; }
+
+    /* ── Search ── */
+    .btn-search { background: var(--surface2); color: var(--text2); }
+    .btn-search:active { background: var(--border); transform: scale(.91); }
+    .btn-search.active { background: var(--primary); color: #fff; }
+    .search-row { padding: 0 20px 10px; }
+    .search-row.hidden { display: none; }
+    .search-input {
+      width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 15px; font-family: inherit; color: var(--text); background: var(--surface2);
+      outline: none; transition: border-color .15s;
+    }
+    .search-input:focus { border-color: var(--primary); background: var(--surface); }
+
+    /* ── Subtasks on card ── */
+    .subtasks { display: flex; flex-direction: column; gap: 1px; margin-top: 6px; }
+    .subtask {
+      display: flex; align-items: center; gap: 8px; background: none; border: none;
+      padding: 3px 0; cursor: pointer; text-align: left; width: 100%; font-family: inherit;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    .sub-check {
+      width: 17px; height: 17px; border-radius: 5px; border: 1.6px solid var(--border);
+      display: flex; align-items: center; justify-content: center; font-size: 11px;
+      color: transparent; flex-shrink: 0; transition: all .15s;
+    }
+    .sub-check.done { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .sub-text { font-size: 13px; color: var(--text2); }
+    .sub-text.done { text-decoration: line-through; color: var(--text3); }
+    .subtask-progress { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+    /* ── Clear done ── */
+    .done-label { display: flex; align-items: center; justify-content: space-between; }
+    .clear-done-btn {
+      font-size: 11px; font-weight: 600; letter-spacing: 0; text-transform: none;
+      color: var(--text3); background: none; border: none; cursor: pointer;
+      padding: 4px 9px; border-radius: 8px; font-family: inherit;
+      -webkit-tap-highlight-color: transparent; touch-action: manipulation; transition: all .15s;
+    }
+    .clear-done-btn.confirm { color: #EF4444; background: #FEE2E2; }
+
+    /* ── Subtask editor (modal) ── */
+    .subtask-edit-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .subtask-edit-list:empty { margin-bottom: 0; }
+    .subtask-edit-row { display: flex; align-items: center; gap: 10px; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+    .subtask-edit-row span { flex: 1; font-size: 14px; word-break: break-word; }
+    .subtask-edit-del { width: 30px; height: 30px; border: none; background: none; color: var(--text3); cursor: pointer; border-radius: 8px; flex-shrink: 0; font-size: 14px; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .subtask-edit-del:active { background: #FEE2E2; color: #EF4444; }
+    .subtask-add-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    .subtask-add-row input { flex: 1; padding: 11px 12px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; font-family: inherit; color: var(--text); background: var(--surface2); outline: none; transition: border-color .15s; }
+    .subtask-add-row input:focus { border-color: var(--primary); background: var(--surface); }
+    .subtask-add-row button { width: 46px; border: none; border-radius: 10px; background: var(--primary); color: #fff; font-size: 22px; line-height: 1; cursor: pointer; flex-shrink: 0; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+    /* ── Time input ── */
+    .due-time-input { margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -262,6 +317,12 @@
         <span class="count-badge" id="count-label"></span>
       </div>
       <div class="header-actions">
+        <button class="icon-btn btn-search" id="btn-search" aria-label="Suchen">
+          <svg width="19" height="19" viewBox="0 0 20 20" fill="none">
+            <circle cx="9" cy="9" r="6" stroke="currentColor" stroke-width="1.7"/>
+            <path d="M13.5 13.5L18 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          </svg>
+        </button>
         <button class="icon-btn btn-settings" id="btn-settings" aria-label="Einstellungen">
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
             <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.6"/>
@@ -281,6 +342,9 @@
     </div>
     <div class="filter-scroll">
       <div class="filter-tabs" id="filter-tabs"></div>
+    </div>
+    <div class="search-row hidden" id="search-row">
+      <input type="text" class="search-input" id="search-input" placeholder="Aufgaben durchsuchen..." autocomplete="off">
     </div>
   </header>
   <main id="main"></main>
@@ -312,6 +376,13 @@
         </button>
       </div>
       <input type="date" class="due-date-input hidden" id="due-date-input">
+      <input type="time" class="due-date-input due-time-input hidden" id="due-time-input">
+    </div>
+    <div class="field-label">Checkliste <span class="opt">(optional)</span></div>
+    <div class="subtask-edit-list" id="subtask-edit-list"></div>
+    <div class="subtask-add-row">
+      <input type="text" id="subtask-add-input" placeholder="Schritt hinzufügen..." maxlength="60" autocomplete="off">
+      <button type="button" id="subtask-add-btn" aria-label="Schritt hinzufügen">+</button>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" id="btn-cancel">Abbrechen</button>
@@ -383,6 +454,7 @@ let categories = [];
 let filter     = 'all';
 let confirmDeleteCat = null; // id awaiting second tap
 let workspace  = 'work';    // 'work' | 'personal'
+let searchQuery = '';       // aktueller Suchtext
 
 // ── Persistence ───────────────────────────────────────
 function load() {
@@ -446,13 +518,36 @@ function migrateIfNeeded() {
 }
 
 // ── Todo mutations ────────────────────────────────────
-function addTodo(title, cat, due, note) {
-  todos.unshift({ id: Date.now().toString(36), title: title.trim(), cat, due: due||null, note: note||null, important: false, done: false });
+function addTodo(title, cat, due, note, time, subtasks) {
+  todos.unshift({ id: Date.now().toString(36), title: title.trim(), cat, due: due||null, time: time||null, note: note||null, subtasks: subtasks||[], important: false, done: false });
   save(); render();
 }
 function toggle(id) {
   const t = todos.find(t => t.id === id);
   if (t) { t.done = !t.done; save(); render(); }
+}
+function toggleSubtask(id, sid) {
+  const t = todos.find(t => t.id === id);
+  if (!t || !Array.isArray(t.subtasks)) return;
+  const s = t.subtasks.find(s => s.id === sid);
+  if (s) { s.done = !s.done; save(); render(); }
+}
+// Alle erledigten Aufgaben des aktuellen Workspace löschen (zweistufige Bestätigung)
+let clearArmed = false, clearTimer = null;
+function clearDone() {
+  const btn = document.getElementById('clear-done');
+  if (!btn) return;
+  if (clearArmed) {
+    clearTimeout(clearTimer); clearArmed = false;
+    todos = todos.filter(t => !t.done); save(); render();
+    return;
+  }
+  clearArmed = true; btn.textContent = 'Wirklich löschen?'; btn.classList.add('confirm');
+  clearTimer = setTimeout(() => {
+    clearArmed = false;
+    const b = document.getElementById('clear-done');
+    if (b) { b.textContent = 'Aufräumen'; b.classList.remove('confirm'); }
+  }, 3000);
 }
 function toggleImportant(id) {
   const t = todos.find(t => t.id === id);
@@ -478,15 +573,20 @@ function reorderCat(fromIdx, toIdx) {
 }
 
 // ── Due date helpers ──────────────────────────────────
-function dueLabelInfo(due) {
+function dueLabelInfo(due, time) {
   if (!due) return null;
   const today = isoDate(0);
-  if (due < today)        return { text: 'Überfällig',  cls: 'overdue' };
-  if (due === today)      return { text: 'Heute',       cls: 'today' };
-  if (due === isoDate(1)) return { text: 'Morgen',      cls: 'soon' };
-  if (due === isoDate(2)) return { text: 'Übermorgen',  cls: 'soon' };
-  const d = new Date(due + 'T12:00:00');
-  return { text: d.toLocaleDateString('de-DE', { weekday:'short', day:'numeric', month:'short' }), cls: 'upcoming' };
+  let info;
+  if (due < today)        info = { text: 'Überfällig',  cls: 'overdue' };
+  else if (due === today) info = { text: 'Heute',       cls: 'today' };
+  else if (due === isoDate(1)) info = { text: 'Morgen',  cls: 'soon' };
+  else if (due === isoDate(2)) info = { text: 'Übermorgen', cls: 'soon' };
+  else {
+    const d = new Date(due + 'T12:00:00');
+    info = { text: d.toLocaleDateString('de-DE', { weekday:'short', day:'numeric', month:'short' }), cls: 'upcoming' };
+  }
+  if (time) info.text += ' ' + time;
+  return info;
 }
 
 function sortOpen(arr) {
@@ -531,7 +631,15 @@ function renderCatGrid() {
 function render() {
   renderFilterTabs();
   const main = document.getElementById('main');
-  const filtered = filter === 'all' ? todos : todos.filter(t => t.cat === filter);
+  let filtered = filter === 'all' ? todos : todos.filter(t => t.cat === filter);
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(t =>
+      t.title.toLowerCase().includes(q) ||
+      (t.note && t.note.toLowerCase().includes(q)) ||
+      (Array.isArray(t.subtasks) && t.subtasks.some(s => s.text.toLowerCase().includes(q)))
+    );
+  }
   const open = sortOpen(filtered.filter(t => !t.done));
   const done = filtered.filter(t => t.done);
 
@@ -541,13 +649,14 @@ function render() {
     totalOpen > 0 ? `${totalOpen} offen${imp > 0 ? ' · '+imp+' ★' : ''}` : 'Alles erledigt ✓';
 
   if (filtered.length === 0) {
-    main.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>${filter==='all'?'Noch keine Aufgaben.':'Keine Aufgaben in dieser Kategorie.'}</p></div>`;
+    const msg = searchQuery ? 'Nichts gefunden.' : (filter==='all' ? 'Noch keine Aufgaben.' : 'Keine Aufgaben in dieser Kategorie.');
+    main.innerHTML = `<div class="empty-state"><div class="icon">${searchQuery?'🔍':'📋'}</div><p>${msg}</p></div>`;
     return;
   }
 
   let html = '';
   if (open.length) html += `<div class="section-label">Offen (${open.length})</div><div class="todo-list">${open.map(wrapHTML).join('')}</div>`;
-  if (done.length) html += `<div class="section-label">Erledigt (${done.length})</div><div class="todo-list">${done.map(wrapHTML).join('')}</div>`;
+  if (done.length) html += `<div class="section-label done-label">Erledigt (${done.length})<button class="clear-done-btn" id="clear-done">Aufräumen</button></div><div class="todo-list">${done.map(wrapHTML).join('')}</div>`;
   main.innerHTML = html;
 
   main.querySelectorAll('.check-btn').forEach(b  => b.addEventListener('click', () => toggle(b.dataset.id)));
@@ -555,6 +664,9 @@ function render() {
   main.querySelectorAll('.delete-btn').forEach(b => b.addEventListener('click', () => remove(b.dataset.id)));
   main.querySelectorAll('.note-area').forEach(b  => b.addEventListener('click', () => openEditNote(b.dataset.id)));
   main.querySelectorAll('.todo-title').forEach(b => b.addEventListener('click', () => openModal(b.dataset.id)));
+  main.querySelectorAll('.subtask').forEach(b => b.addEventListener('click', () => toggleSubtask(b.dataset.id, b.dataset.sid)));
+  const clrBtn = document.getElementById('clear-done');
+  if (clrBtn) clrBtn.addEventListener('click', clearDone);
   main.querySelectorAll('.todo-wrap').forEach(wrap => {
     const card = wrap.querySelector('.todo-card');
     initSwipe(card, wrap.querySelector('.swipe-bg-right'), wrap.querySelector('.swipe-bg-left'),
@@ -571,8 +683,16 @@ function cardHTML(t) {
   const color = cat ? cat.color : '#94A3B8';
   const label = cat ? cat.label : t.cat;
   const bg    = catBg(color);
-  const due   = dueLabelInfo(t.due);
+  const due   = dueLabelInfo(t.due, t.time);
   const isOverdue = !t.done && due?.cls === 'overdue';
+  const subs    = Array.isArray(t.subtasks) ? t.subtasks : [];
+  const subDone = subs.filter(s => s.done).length;
+  const subsHTML = subs.length ? `<div class="subtasks">${subs.map(s => `
+        <button class="subtask" data-id="${t.id}" data-sid="${s.id}" aria-label="Schritt umschalten">
+          <span class="sub-check${s.done?' done':''}">✓</span>
+          <span class="sub-text${s.done?' done':''}">${escHtml(s.text)}</span>
+        </button>`).join('')}</div>` : '';
+  const progressBadge = subs.length ? `<span class="subtask-progress">☑ ${subDone}/${subs.length}</span>` : '';
   const cls = [t.done?'done':'', isOverdue?'overdue':'', t.important?'important':''].filter(Boolean).join(' ');
   const ringStyle = t.done
     ? `background:${color};border-color:${color}`
@@ -594,9 +714,11 @@ function cardHTML(t) {
             ? `<span class="todo-note">${escHtml(t.note)}</span><span class="note-edit-icon">✏</span>`
             : `<span class="add-note-hint">+ Notiz</span>`}
         </button>
+        ${subsHTML}
         <div class="todo-meta">
           <span class="cat-badge" style="background:${bg};color:${color}">${escHtml(label)}</span>
           ${due ? `<span class="due-label due-${due.cls}">${due.text}</span>` : ''}
+          ${progressBadge}
         </div>
       </div>
       <button class="delete-btn" data-id="${t.id}" aria-label="Löschen">
@@ -682,9 +804,17 @@ const input        = document.getElementById('todo-input');
 const noteInput    = document.getElementById('note-input');
 const saveBtn      = document.getElementById('btn-save');
 const dueDateInput = document.getElementById('due-date-input');
+const dueTimeInput = document.getElementById('due-time-input');
 let selectedCat = null, selectedDue = null, selectedCatColor = null;
 let editTodoId = null; // null = Neu anlegen, sonst ID der bearbeiteten Aufgabe
+let modalSubtasks = []; // Arbeitskopie der Checkliste im Modal
 const modalTitle = document.getElementById('modal-title');
+
+// Uhrzeit-Feld nur zeigen, wenn ein Datum gewählt ist
+function syncTimeVisibility() {
+  if (selectedDue) dueTimeInput.classList.remove('hidden');
+  else { dueTimeInput.classList.add('hidden'); dueTimeInput.value = ''; }
+}
 
 // Kategorie in der Modal-Auswahl markieren
 function selectCatUI(catId) {
@@ -700,17 +830,19 @@ function selectCatUI(catId) {
 }
 
 // Fälligkeits-Chips/Datum nach Wert setzen
-function setDueUI(due) {
+function setDueUI(due, time) {
   document.querySelectorAll('.due-chip').forEach(c => c.classList.remove('active'));
   dueDateInput.value = ''; dueDateInput.classList.add('hidden');
   selectedDue = due || null;
-  if (!due) return;
+  if (!due) { dueTimeInput.value = ''; dueTimeInput.classList.add('hidden'); return; }
   const chip = due === isoDate(0) ? document.querySelector('.due-chip[data-offset="0"]')
              : due === isoDate(1) ? document.querySelector('.due-chip[data-offset="1"]')
              : due === isoDate(2) ? document.querySelector('.due-chip[data-offset="2"]')
              : null;
   if (chip) { chip.classList.add('active'); }
   else { dueDateInput.value = due; dueDateInput.classList.remove('hidden'); document.getElementById('chip-custom').classList.add('active'); }
+  dueTimeInput.classList.remove('hidden');
+  dueTimeInput.value = time || '';
 }
 
 function openModal(editId) {
@@ -725,7 +857,8 @@ function openModal(editId) {
     noteInput.value = t.note || '';
     dueDateInput.min = ''; // beim Bearbeiten auch vergangene Termine zulassen
     selectCatUI(t.cat);
-    setDueUI(t.due);
+    setDueUI(t.due, t.time);
+    modalSubtasks = Array.isArray(t.subtasks) ? t.subtasks.map(s => ({...s})) : [];
     updateSaveBtn();
   } else {
     editTodoId = null;
@@ -737,8 +870,12 @@ function openModal(editId) {
     document.querySelectorAll('.cat-option').forEach(o => { o.style.borderColor=''; o.style.background=''; });
     document.querySelectorAll('.due-chip').forEach(c => c.classList.remove('active'));
     dueDateInput.value = ''; dueDateInput.classList.add('hidden');
+    dueTimeInput.value = ''; dueTimeInput.classList.add('hidden');
     dueDateInput.min = isoDate(0);
+    modalSubtasks = [];
   }
+  document.getElementById('subtask-add-input').value = '';
+  renderModalSubtasks();
   setTimeout(() => input.focus(), 150);
 }
 function closeModal() { backdrop.classList.remove('open'); editTodoId = null; input.blur(); noteInput.blur(); dueDateInput.blur(); }
@@ -766,33 +903,66 @@ document.getElementById('due-chips').addEventListener('click', e => {
     const showing = !dueDateInput.classList.contains('hidden');
     if (showing) { dueDateInput.classList.add('hidden'); dueDateInput.value=''; chip.classList.remove('active'); selectedDue=null; }
     else { dueDateInput.classList.remove('hidden'); document.querySelectorAll('.due-chip[data-offset]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); selectedDue=null; setTimeout(()=>dueDateInput.focus(),50); }
+    syncTimeVisibility();
     return;
   }
   const newDue = isoDate(parseInt(chip.dataset.offset));
   if (selectedDue === newDue) { selectedDue=null; chip.classList.remove('active'); }
   else { selectedDue=newDue; document.querySelectorAll('.due-chip').forEach(c=>c.classList.remove('active')); dueDateInput.classList.add('hidden'); dueDateInput.value=''; chip.classList.add('active'); }
+  syncTimeVisibility();
 });
 
 dueDateInput.addEventListener('change', e => {
   selectedDue = e.target.value || null;
   if (selectedDue) { document.querySelectorAll('.due-chip[data-offset]').forEach(c=>c.classList.remove('active')); document.getElementById('chip-custom').classList.add('active'); }
+  syncTimeVisibility();
 });
+
+// Uhrzeit gesetzt → ggf. Erlaubnis für Benachrichtigungen anfragen
+dueTimeInput.addEventListener('change', maybeRequestNotify);
+
+// ── Checklisten-Editor (Modal) ────────────────────────
+function renderModalSubtasks() {
+  const list = document.getElementById('subtask-edit-list');
+  list.innerHTML = modalSubtasks.map((s, i) => `
+    <div class="subtask-edit-row" data-i="${i}">
+      <span>${escHtml(s.text)}</span>
+      <button type="button" class="subtask-edit-del" data-i="${i}" aria-label="Entfernen">✕</button>
+    </div>`).join('');
+  list.querySelectorAll('.subtask-edit-del').forEach(b =>
+    b.addEventListener('click', () => { modalSubtasks.splice(parseInt(b.dataset.i), 1); renderModalSubtasks(); })
+  );
+}
+function addModalSubtask() {
+  const inp = document.getElementById('subtask-add-input');
+  const v = inp.value.trim();
+  if (!v) return;
+  modalSubtasks.push({ id: 's' + Date.now().toString(36) + '_' + modalSubtasks.length, text: v, done: false });
+  inp.value = ''; renderModalSubtasks(); inp.focus();
+}
+document.getElementById('subtask-add-btn').addEventListener('click', addModalSubtask);
+document.getElementById('subtask-add-input').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addModalSubtask(); } });
 
 input.addEventListener('input', updateSaveBtn);
 function updateSaveBtn() { saveBtn.disabled = !(input.value.trim() && selectedCat); }
 function commitModal() {
   if (!input.value.trim() || !selectedCat) return;
+  const time = selectedDue ? (dueTimeInput.value || null) : null;
+  const subs = modalSubtasks.map(s => ({...s}));
   if (editTodoId) {
     const t = todos.find(x => x.id === editTodoId);
     if (t) {
       t.title = input.value.trim();
       t.cat   = selectedCat;
       t.due   = selectedDue || null;
+      t.time  = time;
       t.note  = noteInput.value.trim() || null;
+      t.subtasks = subs;
+      t.notified = false; // bei Änderung darf die Erinnerung erneut feuern
       save(); render();
     }
   } else {
-    addTodo(input.value, selectedCat, selectedDue, noteInput.value);
+    addTodo(input.value, selectedCat, selectedDue, noteInput.value, time, subs);
   }
   closeModal();
 }
@@ -998,6 +1168,49 @@ document.getElementById('edit-note-save').addEventListener('click', saveNote);
 document.getElementById('edit-note-backdrop').addEventListener('click', e => { if (e.target === document.getElementById('edit-note-backdrop')) closeEditNote(); });
 document.getElementById('edit-note-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveNote(); });
 
+// ── Suche ─────────────────────────────────────────────
+const searchRow   = document.getElementById('search-row');
+const searchInput = document.getElementById('search-input');
+document.getElementById('btn-search').addEventListener('click', () => {
+  const btn = document.getElementById('btn-search');
+  const showing = !searchRow.classList.contains('hidden');
+  if (showing) {
+    searchRow.classList.add('hidden'); btn.classList.remove('active');
+    searchInput.value = ''; searchQuery = ''; render();
+  } else {
+    searchRow.classList.remove('hidden'); btn.classList.add('active');
+    setTimeout(() => searchInput.focus(), 50);
+  }
+});
+searchInput.addEventListener('input', e => { searchQuery = e.target.value.trim(); render(); });
+
+// ── Erinnerungen ──────────────────────────────────────
+function maybeRequestNotify() {
+  if (('Notification' in window) && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+// Prüft alle Workspaces auf fällige Aufgaben mit Uhrzeit (best effort, solange App offen/aktiv)
+function checkReminders() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const now = new Date();
+  let activeDirty = false;
+  ['work', 'personal'].forEach(ws => {
+    let list;
+    try { list = JSON.parse(localStorage.getItem('todos_' + ws) || '[]'); } catch { return; }
+    let dirty = false;
+    list.forEach(t => {
+      if (t.done || !t.due || !t.time || t.notified) return;
+      if (new Date(t.due + 'T' + t.time) <= now) {
+        try { new Notification(t.title, { body: (ws === 'work' ? 'Arbeit' : 'Privat') + (t.note ? ' · ' + t.note : ''), tag: t.id }); } catch {}
+        t.notified = true; dirty = true;
+      }
+    });
+    if (dirty) { localStorage.setItem('todos_' + ws, JSON.stringify(list)); if (ws === workspace) activeDirty = true; }
+  });
+  if (activeDirty) { load(); render(); }
+}
+
 // ── PWA ───────────────────────────────────────────────
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
@@ -1006,6 +1219,9 @@ migrateIfNeeded();
 workspace = localStorage.getItem('workspace') || 'work';
 load(); loadCats(); render(); renderCatGrid();
 updateWorkspaceSwitcher();
+checkReminders();
+setInterval(checkReminders, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkReminders(); });
 </script>
 </body>
 </html>
