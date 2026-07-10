@@ -306,6 +306,12 @@
 
     /* ── Time input ── */
     .due-time-input { margin-top: 10px; }
+    .add-time-btn {
+      display: none; margin-top: 8px; padding: 0; background: none; border: none;
+      font-size: 13px; font-weight: 500; color: var(--text3); cursor: pointer;
+      font-family: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+    }
+    .add-time-btn.visible { display: inline-flex; align-items: center; gap: 4px; }
   </style>
 </head>
 <body>
@@ -376,6 +382,7 @@
         </button>
       </div>
       <input type="date" class="due-date-input hidden" id="due-date-input">
+      <button type="button" class="add-time-btn" id="add-time-btn">+ Uhrzeit</button>
       <input type="time" class="due-date-input due-time-input hidden" id="due-time-input">
     </div>
     <div class="field-label">Checkliste <span class="opt">(optional)</span></div>
@@ -810,11 +817,31 @@ let editTodoId = null; // null = Neu anlegen, sonst ID der bearbeiteten Aufgabe
 let modalSubtasks = []; // Arbeitskopie der Checkliste im Modal
 const modalTitle = document.getElementById('modal-title');
 
-// Uhrzeit-Feld nur zeigen, wenn ein Datum gewählt ist
-function syncTimeVisibility() {
-  if (selectedDue) dueTimeInput.classList.remove('hidden');
-  else { dueTimeInput.classList.add('hidden'); dueTimeInput.value = ''; }
+const addTimeBtn = document.getElementById('add-time-btn');
+
+// "+ Uhrzeit"-Button zeigen wenn Datum gewählt, Uhrzeit-Input nur auf expliziten Klick
+function syncTimeVisibility(forceShowTime) {
+  const addBtn = document.getElementById('add-time-btn');
+  if (selectedDue) {
+    if (forceShowTime || dueTimeInput.value) {
+      dueTimeInput.classList.remove('hidden');
+      addBtn.classList.remove('visible');
+    } else {
+      dueTimeInput.classList.add('hidden');
+      addBtn.classList.add('visible');
+    }
+  } else {
+    dueTimeInput.classList.add('hidden');
+    dueTimeInput.value = '';
+    addBtn.classList.remove('visible');
+  }
 }
+
+addTimeBtn.addEventListener('click', () => {
+  addTimeBtn.classList.remove('visible');
+  dueTimeInput.classList.remove('hidden');
+  dueTimeInput.focus();
+});
 
 // Kategorie in der Modal-Auswahl markieren
 function selectCatUI(catId) {
@@ -841,8 +868,8 @@ function setDueUI(due, time) {
              : null;
   if (chip) { chip.classList.add('active'); }
   else { dueDateInput.value = due; dueDateInput.classList.remove('hidden'); document.getElementById('chip-custom').classList.add('active'); }
-  dueTimeInput.classList.remove('hidden');
   dueTimeInput.value = time || '';
+  syncTimeVisibility();
 }
 
 function openModal(editId) {
@@ -871,6 +898,7 @@ function openModal(editId) {
     document.querySelectorAll('.due-chip').forEach(c => c.classList.remove('active'));
     dueDateInput.value = ''; dueDateInput.classList.add('hidden');
     dueTimeInput.value = ''; dueTimeInput.classList.add('hidden');
+    document.getElementById('add-time-btn').classList.remove('visible');
     dueDateInput.min = isoDate(0);
     modalSubtasks = [];
   }
