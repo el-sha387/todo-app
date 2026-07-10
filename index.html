@@ -912,11 +912,13 @@ document.getElementById('due-chips').addEventListener('click', e => {
   syncTimeVisibility();
 });
 
-dueDateInput.addEventListener('change', e => {
+function handleDueDateInput(e) {
   selectedDue = e.target.value || null;
   if (selectedDue) { document.querySelectorAll('.due-chip[data-offset]').forEach(c=>c.classList.remove('active')); document.getElementById('chip-custom').classList.add('active'); }
   syncTimeVisibility();
-});
+}
+dueDateInput.addEventListener('change', handleDueDateInput);
+dueDateInput.addEventListener('input', handleDueDateInput);
 
 // Uhrzeit gesetzt → ggf. Erlaubnis für Benachrichtigungen anfragen
 dueTimeInput.addEventListener('change', maybeRequestNotify);
@@ -947,6 +949,10 @@ input.addEventListener('input', updateSaveBtn);
 function updateSaveBtn() { saveBtn.disabled = !(input.value.trim() && selectedCat); }
 function commitModal() {
   if (!input.value.trim() || !selectedCat) return;
+  // Fallback für iOS: change-Event feuert nicht immer zuverlässig
+  if (!selectedDue && !dueDateInput.classList.contains('hidden') && dueDateInput.value) {
+    selectedDue = dueDateInput.value;
+  }
   const time = selectedDue ? (dueTimeInput.value || null) : null;
   const subs = modalSubtasks.map(s => ({...s}));
   if (editTodoId) {
